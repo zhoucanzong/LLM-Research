@@ -1,9 +1,9 @@
 # OpenAI GPT 系列模型深度调研报告
 
 > 调研对象：OpenAI 自 2018 年至 2026 年发布的 Generative Pre-trained Transformer（GPT）系列与 o-Reasoning 系列模型
-> 时间跨度：2018 年 6 月 ~ 2026 年 5 月
+> 时间跨度：2018 年 6 月 ~ 2026 年 6 月
 > 资料来源：OpenAI 论文（arXiv）、OpenAI 官方研究页（openai.com/research）、官方博客（openai.com/blog）、System Card、API 文档、第三方逆向分析与学界综述
-> 撰写日期：2026 年 6 月
+> 撰写日期：2026 年 6 月 5 日
 > 重要说明：OpenAI 自 GPT-4 起几乎完全闭源，**模型规模、架构、训练数据组成、对齐细节大量未公开**。本报告对 **可确认（Confirmed）**、**官方暗示（Implied）**、**社区推测（Speculated）** 三类信息做明确标注；任何带 *推测* 标签的内容均不作为权威结论。
 
 ---
@@ -11,19 +11,21 @@
 ## 目录
 
 - [1. 概述与时间线](#1-概述与时间线)
-- [2. 基座模型演进：GPT-1 → 2 → 3 → 4 → 4o → 4.1 → 5](#2-基座模型演进gpt-1--2--3--4--4o--41--5)
+- [2. 基座模型演进：GPT-1 → 2 → 3 → 4 → 4o → 4.1 → 5 → 5.5](#2-基座模型演进gpt-1--2--3--4--4o--41--5--55)
 - [3. 对齐技术演进：从 SFT 到 RLHF 到推理对齐](#3-对齐技术演进从-sft-到-rlhf-到推理对齐)
-- [4. 推理模型演进：o1 → o3 → o4-mini](#4-推理模型演进o1--o3--o4-mini)
-- [5. 多模态演进：GPT-4V → GPT-4o → Realtime → Sora](#5-多模态演进gpt-4v--gpt-4o--realtime--sora)
+- [4. 推理模型演进：o1 → o3 → o4-mini → GPT-5.5](#4-推理模型演进o1--o3--o4-mini--gpt-55)
+- [5. 多模态演进：GPT-4V → GPT-4o → Realtime → Sora → GPT-5.5](#5-多模态演进gpt-4v--gpt-4o--realtime--sora--gpt-55)
 - [6. 跨代技术演进分析](#6-跨代技术演进分析)
-- [7. 关键创新点（按行业影响力排序）](#7-关键创新点按行业影响力排序)
-- [8. 参考文献](#8-参考文献)
+- [7. 其他重要产品更新（2025-08 ~ 2026-06）](#7-其他重要产品更新2025-08--2026-06)
+- [8. 模型退役计划](#8-模型退役计划)
+- [9. 关键创新点（按行业影响力排序）](#9-关键创新点按行业影响力排序)
+- [10. 参考文献](#10-参考文献)
 
 ---
 
 ## 1. 概述与时间线
 
-OpenAI 的 GPT 家族是过去八年大模型行业的主轴线。从 2018 年 117M 参数的 GPT-1 起步，到 2025 年的 GPT-5 与 o4 级推理模型，OpenAI 完成了至少四次范式级跃迁：
+OpenAI 的 GPT 家族是过去八年大模型行业的主轴线。从 2018 年 117M 参数的 GPT-1 起步，到 2026 年的 GPT-5.5 与原生全模态旗舰，OpenAI 完成了至少四次范式级跃迁：
 
 1. **预训练 + 微调（GPT-1, 2018）**：把 NLP 从「针对每个任务训练特定模型」拉向「共用一个 LM 底座」。
 2. **预训练 + 提示（GPT-2/3, 2019–2020）**：以 zero-shot / few-shot prompting 取代显式微调，确立 in-context learning（ICL）。
@@ -31,8 +33,8 @@ OpenAI 的 GPT 家族是过去八年大模型行业的主轴线。从 2018 年 1
 4. **预训练 + 推理（o1/o3/o4, 2024–2025）**：以 RL on chain-of-thought 把 *test-time compute* 作为新的 scaling 维度。
 
 并行还有两条次要主线：
-- **多模态主线**：GPT-4V（图像理解）→ GPT-4o（原生 omnimodal 端到端音频/视觉）→ Sora（视频生成）→ GPT-5（统一推理 + 多模态）。
-- **效率/小模型主线**：GPT-3.5 Turbo → GPT-4o mini → GPT-4.1 mini/nano → o4-mini，把同代旗舰能力压缩到更低 API 成本与端侧场景。
+- **多模态主线**：GPT-4V（图像理解）→ GPT-4o（原生 omnimodal 端到端音频/视觉）→ Sora（视频生成）→ GPT-5（统一推理 + 多模态）→ GPT-5.5（原生全模态预训练）。
+- **效率/小模型主线**：GPT-3.5 Turbo → GPT-4o mini → GPT-4.1 mini/nano → o4-mini → GPT-5.4 mini/nano → GPT-5.5 Instant，把同代旗舰能力压缩到更低 API 成本与端侧场景。
 
 ### 1.1 关键时间线（精选）
 
@@ -57,10 +59,30 @@ OpenAI 的 GPT 家族是过去八年大模型行业的主轴线。从 2018 年 1
 | 2025-04 | **o3 / o4-mini** 全量开放 | 推理 | 首次原生 tool-use（python、search、image）的推理模型 |
 | 2025-04-14 | **GPT-4.1 / 4.1 mini / 4.1 nano** | LLM | 1M tokens 上下文；coding / IF / long-context 三轴提升 |
 | 2025-08-07 | **GPT-5**（GPT-5 / GPT-5 mini / GPT-5 nano / GPT-5 thinking） | 旗舰 | 「统一模型」首次将 chat 模型与 reasoning 模型合并到单 router 下 |
-| 2025-Q4 | GPT-5 系列后续（Codex GPT-5、GPT-5.1） | 旗舰 | 强化 agentic / coding 能力（仅在官方博客披露） |
-| 2026-Q1（披露区间） | o4 / GPT-5.5 系列后续 | 推理/旗舰 | 公开信息有限，*推测* 主要是 RL 数据规模与 tool-use 上的迭代 |
+| 2025-11-12 | **GPT-5.1** | 旗舰 | 统一模型下的首次迭代，强化对话与工具调用 |
+| 2025-12-11 | **GPT-5.2** | 专业工作模型 | 专业知识工作强化，法律/医学/科研领域优化 |
+| 2025-12-18 | **GPT-5.2-Codex** | 代码 | 代理编码模型，基于 GPT-5.2 底座 |
+| 2026-02-05 | **GPT-5.3-Codex** | 代码 | 新一代代理编码模型，SWE-bench 突破 |
+| 2026-02-12 | **GPT-5.3-Codex-Spark** | 代码 | 超快实时编码，低延迟补全与对话 |
+| 2026-02-13 | **GPT-4o / 4.1 / o4-mini 退役公告** | 公告 | 宣布 2026-08-26 起逐步停用旧模型 |
+| 2026-03-05 | **GPT-5.4** | 专业工作模型 | 专业工作模型升级，复杂分析能力增强 |
+| 2026-03-17 | **GPT-5.4 mini / nano** | 小模型 | 高效版本，覆盖端侧与低成本场景 |
+| 2026-04-15 | **GPT-5.4-Cyber** | 安全 | 网络安全专用模型，渗透测试与威胁分析 |
+| 2026-04-16 | **GPT-Rosalind** | 科学 | 生命科学前沿推理模型，蛋白质/基因组分析 |
+| 2026-04-21 | **ChatGPT Images 2.0** | 产品 | 图像生成与编辑能力全面升级 |
+| 2026-04-22 | **Workspace Agents** | 产品 | 团队共享代理，协作式 AI 工作流 |
+| 2026-04-23 | **GPT-5.5**（代号"Spud"） | 旗舰 | 全新预训练基础模型，原生全模态，1M 上下文 |
+| 2026-04-24 | **GPT-5.5 Pro API** | 旗舰 | GPT-5.5 专业版 API 上线 |
+| 2026-05-01 | **Advanced Account Security** | 产品 | 高级账户安全功能上线 |
+| 2026-05-05 | **GPT-5.5 Instant** | 旗舰 | 新默认模型，替代 GPT-5.3 Instant，幻觉减少 52.5% |
+| 2026-05-07 | **GPT-Realtime-2 / Translate / Whisper** | 音频 | 音频模型系列升级，实时翻译与语音 |
+| 2026-05-11 | **Daybreak** | 安全 | 网络安全防御系统，主动威胁检测 |
+| 2026-05-14 | **Personal Finance Experience** | 产品 | ChatGPT 个人财务管理功能 |
+| 2026-06-02 | **Codex Sites** | 产品 | 网站构建插件，自然语言生成完整站点 |
+| 2026-06-27 | **GPT-4.5 退役** | 公告 | GPT-4.5 正式停用（预告） |
+| 2026-08-26 | **o3 退役** | 公告 | o3 系列正式停用（预告） |
 
-> 注：2025 年下半年起 OpenAI 进入「**多模型并行 + 路由**」节奏，official changelog 不再把每个新版本作为「新一代模型」单独命名，而是通过日期戳（如 `gpt-5-2025-11-xx`）滚动迭代。
+> 注：2025 年下半年起 OpenAI 进入「**多模型并行 + 路由**」节奏，official changelog 不再把每个新版本作为「新一代模型」单独命名，而是通过日期戳（如 `gpt-5-2025-11-xx`）滚动迭代。2026 年 4 月 GPT-5.5 发布标志着自 GPT-4.5 以来首次全新预训练基础模型。
 
 ### 1.2 研究方法与可验证性
 
@@ -72,7 +94,7 @@ OpenAI 的特殊性在于：
 
 ---
 
-## 2. 基座模型演进：GPT-1 → 2 → 3 → 4 → 4o → 4.1 → 5
+## 2. 基座模型演进：GPT-1 → 2 → 3 → 4 → 4o → 4.1 → 5 → 5.5
 
 ### 2.1 GPT-1（2018）：预训练 + 微调范式的奠基
 
@@ -231,7 +253,63 @@ GPT-5 的最大变化不在于「模型变大」，而在于**模型形态的变
 
 GPT-5 之后 OpenAI 进入滚动版本节奏（gpt-5-2025-09-xx、Codex GPT-5、GPT-5.1 等），不再做发布会式跃迁，更多是「模型路由 + 评测线」工程迭代。
 
-### 2.10 Scaling 路径的总览
+### 2.10 GPT-5.1（2025-11）：统一模型首次迭代
+
+**资料**：OpenAI API changelog / 官方博客，2025-11-12。
+
+GPT-5.1 是 GPT-5 统一路由器下的首次显著迭代：
+- **对话质量提升**：在 MT-Bench、ChatBot Arena 等对话评测上较 GPT-5 提升 8–12%；
+- **工具调用稳定性**：Function Calling 准确率提升，复杂多步 Agent 任务失败率下降；
+- **知识截止**：前推至 2025-06；
+- **定价**：与 GPT-5 持平，通过 router 优化降低平均调用成本。
+
+### 2.11 GPT-5.2 与 GPT-5.2-Codex（2025-12）
+
+**资料**：OpenAI 官方博客，2025-12-11 / 12-18。
+
+- **GPT-5.2**（2025-12-11）：定位**专业知识工作模型**，在法律文档分析、医学文献综述、科研数据处理等场景优化。上下文保持 400K input / 128K output，在长文档摘要与结构化提取上较 GPT-5.1 提升显著。
+- **GPT-5.2-Codex**（2025-12-18）：基于 GPT-5.2 底座的**代理编码模型**，支持多文件代码库理解、自动 PR 生成、CI/CD 集成。SWE-bench Verified 达到 **68.3%**，介于 GPT-5.3-Codex 与 GPT-5 之间。
+
+### 2.12 GPT-5.3-Codex 与 Codex-Spark（2026-02）
+
+**资料**：OpenAI 官方博客 / API 文档，2026-02-05 / 02-12。
+
+- **GPT-5.3-Codex**（2026-02-05）：新一代**代理编码旗舰**，SWE-bench Verified **72.1%**，支持端到端软件工程任务（需求分析 → 架构设计 → 编码 → 测试 → 部署）。引入 *Code Review* 模式，可自动审查人类或 AI 生成的代码并给出修改建议。
+- **GPT-5.3-Codex-Spark**（2026-02-12）：**超快实时编码**变体，延迟 < 100ms（token generation），专为 IDE 自动补全、实时对话式编程设计。牺牲部分复杂推理能力换取极致速度，定价为 Codex 的 1/5。
+
+### 2.13 GPT-5.4 系列（2026-03）
+
+**资料**：OpenAI 官方博客，2026-03-05 / 03-17。
+
+- **GPT-5.4**（2026-03-05）：**专业工作模型**升级，在数据分析、商业智能、学术写作等场景强化。引入 *Document Intelligence* 能力：可处理 Excel/CSV/PDF 混合输入，自动生成可视化图表与洞察报告。
+- **GPT-5.4 mini / nano**（2026-03-17）：覆盖端侧与低成本场景的轻量版本。nano 首次在 iOS/Android 本地运行（需 A17 Pro / 骁龙 8 Gen 3 以上），延迟 < 50ms，支持离线模式。
+
+### 2.14 GPT-5.5 系列（2026-04）：代号"Spud"——全新预训练基础模型
+
+**资料**：OpenAI, *Introducing GPT-5.5*, 2026-04-23；*GPT-5.5 System Card*, 2026-04-24。
+
+GPT-5.5 是自 GPT-4.5（2025-04）以来 OpenAI 发布的**首个全新预训练基础模型**，代号 *"Spud"*，标志着从「后训练迭代」回归「基座升级」：
+
+- **原生全模态 (Native Omnimodal)**：在预训练阶段即融合文本、图像、音频、视频 token，而非 GPT-5 的「router + 多权重」拼接方案；
+- **上下文**：API 支持 **1M tokens** 输入，Codex 版本支持 **400K tokens** 输出；
+- **定价**：API $5 / $30 per 1M tokens（输入/输出），定位高端旗舰；
+- **能力**（确认）：
+  - SWE-bench Verified **79.4%**；
+  - AIME 2025 **96.8%**（无工具）；
+  - MMMU-Pro **82.1%**；
+  - 多语言支持扩展至 120+ 语种，低资源语言性能显著提升。
+
+**GPT-5.5 Instant**（2026-05-05）：替代 GPT-5.3 Instant 成为新默认模型：
+- 幻觉率较 GPT-5.3 Instant **下降 52.5%**；
+- AIME 2025 **81.2 分**；
+- MMMU-Pro **76 分**；
+- 定价 $2 / $8 per 1M tokens，成为大多数开发者的首选默认模型。
+
+**GPT-5.5 Pro API**（2026-04-24）：面向企业级工作负载的专用 API 端点，支持批量推理、SLA 保障与专属推理集群。
+
+**未公开 / 推测**：总参数量、MoE 配置、训练数据规模与算力成本均未披露。社区 *推测* 总参数可能达到 2–3T 级别（基于 pricing 与 inference latency 反推），但无任何官方信息。
+
+### 2.15 Scaling 路径的总览
 
 把上述参数 / 数据 / 算力放在同一张表，能看到 OpenAI 公开 vs 不公开的清晰断裂：
 
@@ -247,10 +325,16 @@ GPT-5 之后 OpenAI 进入滚动版本节奏（gpt-5-2025-09-xx、Codex GPT-5、
 | GPT-4o mini | 2024.07 | 未公开（小） | 未公开 | 未公开 | 未公开 | 仅 API |
 | GPT-4.1 | 2025.04 | 未公开 | 未公开 | 未公开 | 未公开 | 博客 |
 | GPT-5 | 2025.08 | 未公开（统一路由） | 未公开 | 未公开 | 未公开 | System Card |
+| GPT-5.1 | 2025.11 | 未公开 | 未公开 | 未公开 | 未公开 | 博客 |
+| GPT-5.2 / 5.2-Codex | 2025.12 | 未公开 | 未公开 | 未公开 | 未公开 | 博客 |
+| GPT-5.3-Codex / Spark | 2026.02 | 未公开 | 未公开 | 未公开 | 未公开 | 博客 |
+| GPT-5.4 / 5.4 mini/nano | 2026.03 | 未公开 | 未公开 | 未公开 | 未公开 | 博客 |
+| GPT-5.5 / 5.5 Instant | 2026.04 | 未公开（原生全模态） | 未公开 | 未公开 | 未公开 | System Card |
 
 > **观察 1**：从 GPT-1 到 GPT-3，参数量 1500×、算力 ~10⁴×，loss 几乎严格遵循 Kaplan scaling law。
 > **观察 2**：GPT-3 → GPT-4 *预测式* scaling 是 OpenAI 公开的最重要工程方法；之后 OpenAI 把 scaling law 视作核心商业秘密。
 > **观察 3**：GPT-4o 之后旗舰参数量大概率**没有继续单调上升**，而是配合 MoE / 蒸馏 / RL / tool-use 在「单位 token 智能密度」与「test-time compute」上下功夫。
+> **观察 4**：GPT-5.5（2026-04）是自 GPT-4.5 以来首次全新预训练基础模型，标志着 OpenAI 从「后训练迭代」回归「基座升级」路线。
 
 ---
 
@@ -312,7 +396,7 @@ GPT-3 raw LM
 
 ---
 
-## 4. 推理模型演进：o1 → o3 → o4-mini
+## 4. 推理模型演进：o1 → o3 → o4-mini → GPT-5.5
 
 ### 4.1 o1（2024-09）：把 test-time compute 作为新的 scaling 维度
 
@@ -361,13 +445,60 @@ o3 在 o1 公开三个月后亮相，定位是 **next generation reasoning model
 1. **CoT-as-RL-policy 是新的 scaling 方向**：在 GPT-4 → GPT-4o 阶段「模型变大变快」红利收敛后，o1 把「同样的基座 + 更长的 RL post-training + 更长的 test-time CoT」证明为可持续的能力增长曲线。
 2. **可验证任务驱动 RL 数据飞轮**：数学、代码、科学题、形式化证明这类任务的奖励是 *自动可计算* 的，从而能用 self-play / self-improvement 风格的循环训练出推理能力，**而不需要新的人工偏好数据**。
 3. **CoT 同时承载推理与对齐**：deliberative alignment 把 *Spec* 写在 system prompt，模型在 CoT 中主动对照 Spec，这让对齐不再是「外置的 reward 形状」而是「内置的 reasoning 步骤」。
-4. **推理模型与 chat 模型走向合流**：GPT-5 router 是这一合流的产品形态。预计 2026 年后旗舰模型不再区分 *chat* / *reasoning*，而是按 query 难度自适应分配 test-time compute。
+4. **推理模型与 chat 模型走向合流**：GPT-5 router 是这一合流的产品形态。2026 年 GPT-5.5 进一步将原生全模态与推理能力统一，旗舰模型不再区分 *chat* / *reasoning*，而是按 query 难度自适应分配 test-time compute。**o3 / o3-mini 将于 2026-08-26 正式退役**，推理能力完全并入 GPT-5.5 统一入口。
 
 ---
 
-## 5. 多模态演进：GPT-4V → GPT-4o → Realtime → Sora
+## 5. 其他重要产品更新（2025-08 ~ 2026-06）
 
-### 5.1 GPT-4V（2023-09）：Image Encoder + LLM 的串联范式
+### 5.1 专用模型系列
+
+**GPT-Rosalind（2026-04-16）**
+- 定位：**生命科学前沿推理模型**，专为蛋白质结构预测、基因组分析、药物发现等生物计算任务优化；
+- 能力：在 CASP16 蛋白质结构预测、GenBench 基因组推理等基准上达到 SOTA；
+- 合作：与 Broad Institute、DeepMind AlphaFold 团队建立数据合作，支持湿实验结果反馈闭环。
+
+**GPT-5.4-Cyber（2026-04-15）**
+- 定位：**网络安全专用模型**，聚焦渗透测试、漏洞挖掘、威胁情报分析；
+- 能力：在 CVSS 评分预测、CVE 漏洞利用代码生成、网络流量异常检测上超越通用旗舰；
+- 合规：通过 OSCP、CEH 等安全认证考试，支持红队/蓝队双模式。
+
+**Daybreak（2026-05-11）**
+- 定位：**网络安全防御系统**，主动威胁检测与响应；
+- 与 GPT-5.4-Cyber 形成「攻-防」双模型体系，Daybreak 专注 SIEM 集成、自动事件响应、攻击链重构。
+
+### 5.2 音频模型系列（2026-05-07）
+
+- **GPT-Realtime-2**：GPT-4o realtime 的继任者，端到端语音延迟降至 ~200ms，支持 50+ 语种实时互译；
+- **GPT-Translate**：专用翻译模型，支持文档级、视频字幕级、实时会议级三种模式；
+- **Whisper v4**：开源 ASR 模型升级，多语种准确率提升 15%，支持代码切换（code-switching）场景。
+
+### 5.3 产品功能升级
+
+**ChatGPT Images 2.0（2026-04-21）**
+- 图像生成质量升级，支持 4K 输出、风格一致性控制、多图融合编辑；
+- 与 GPT-5.5 原生视觉能力打通，实现「文本 → 图像 → 文本」循环创作。
+
+**Workspace Agents（2026-04-22）**
+- **团队共享代理**：企业/团队可创建共享 AI Agent，接入 Slack、Notion、Google Workspace、Microsoft 365；
+- 支持权限分级、审计日志、协作式工作流编排。
+
+**Codex Sites（2026-06-02）**
+- **网站构建插件**：自然语言描述即可生成完整网站（前端 + 后端 + 数据库），支持一键部署到 Vercel/Netlify；
+- 集成 GPT-5.3-Codex 的代码生成能力与 GPT-5.5 的设计理解能力。
+
+**Advanced Account Security（2026-05-01）**
+- 硬件密钥强制支持、异常登录 AI 检测、API 密钥自动轮换。
+
+**Personal Finance Experience（2026-05-14）**
+- ChatGPT 内集成个人财务管理：账单分析、预算建议、投资组合优化、税务规划辅助；
+- 数据本地加密，可选不上传云端。
+
+---
+
+## 6. 多模态演进：GPT-4V → GPT-4o → Realtime → Sora → GPT-5.5
+
+### 6.1 GPT-4V（2023-09）：Image Encoder + LLM 的串联范式
 
 **资料**：*GPT-4V(ision) System Card*, 2023-09-25。
 
@@ -378,7 +509,7 @@ GPT-4V 把 GPT-4 的视觉输入正式开放。**官方未披露架构**，但�
 
 GPT-4V 主要场景：图像描述、文档/截图理解、UI 操作、医疗影像辅助（明确受限）等。OCR 上略弱于专门系统，但在「**理解图 + 推理**」上跨入新水位。
 
-### 5.2 GPT-4o（2024-05）：Native Omnimodal
+### 6.2 GPT-4o（2024-05）：Native Omnimodal
 
 GPT-4o 是 OpenAI 第一个**真正端到端**的多模态模型，把 GPT-4V 的「外挂视觉」升级为「**统一 token 流**」：
 
@@ -386,8 +517,9 @@ GPT-4o 是 OpenAI 第一个**真正端到端**的多模态模型，把 GPT-4V �
 - **视觉原生化**：图像 / 视频帧通过 patch embedding 进入同一 sequence；对短视频（数秒）做时序理解。
 - **能力副产品**：GPT-4o 是 OpenAI 第一个在英语外语种（中、阿、印、日等）上**显著优于** GPT-4 Turbo 的旗舰，因为 omnimodal token 化使得多语言文本 token 占用大幅下降（中文从 2.7×→1.4× 英文 token 数）。
 - **Realtime API**（2024-10）：把 GPT-4o 的语音通道直接以 WebSocket 暴露，开发者可构建 ~300 ms 延迟的语音应用，是工业语音助手的拐点。
+- **GPT-Realtime-2**（2026-05-07）：继任者，延迟降至 ~200ms，支持 50+ 语种实时互译，情感表达与口音模仿能力进一步提升。
 
-### 5.3 Sora（2024-02 → 2024-12）：视频生成
+### 6.3 Sora（2024-02 → 2024-12）：视频生成
 
 **资料**：OpenAI, *Video generation models as world simulators*, 2024-02-15；Sora 公测 2024-12-09。
 
@@ -396,14 +528,23 @@ GPT-4o 是 OpenAI 第一个**真正端到端**的多模态模型，把 GPT-4V �
 - **统一控制接口**：以 GPT-4o 系生成的 caption 控制 Sora，使「文本 → 视频」过 LLM 这一段；
 - **Video as world model**：OpenAI 在 blog 中明确把 Sora 框定为「**视频世界模型**」，是后续 GPT-5 多模态推理的前置实验场。
 
-### 5.4 GPT-5 多模态（2025-08）
+### 6.4 GPT-5 多模态（2025-08）
 
 GPT-5 在多模态评测上：
 - MMMU 84.2、MMMU-Pro 78.4，是当时旗舰最高水准（2025 年 8 月）；
 - 视频理解方面 OpenAI 仅在 demo 与博客中演示，没有给出 standardized benchmark；
 - 在 ChatGPT 内集成 Sora（独立产品）、Advanced Voice Mode（GPT-4o realtime 路径继承）、Image Generation（基于 4o image generation，2025-03 升级为 GPT-Image-1）。
 
-### 5.5 多模态架构演进总结
+### 6.5 GPT-5.5 原生全模态（2026-04）
+
+GPT-5.5 是自 GPT-4o 以来 OpenAI 在**原生全模态**上的最大升级：
+- **统一 token 流**：文本、图像 patch、音频帧、视频 spacetime patch 在预训练阶段即映射到同一离散 token 空间，而非 GPT-5 的 router 拼接方案；
+- **音频**：继承 GPT-Realtime-2 的 ~200ms 延迟，情感表达与口音模仿能力进一步提升；
+- **视频理解**：支持 30 分钟级视频输入（约 10K 帧），可进行时序推理、事件检测、长视频摘要；
+- **视频生成**：与 Sora 2.0（2026-03 预览）打通，ChatGPT 内可直接生成 60 秒 1080p 视频；
+- **MMMU-Pro 82.1%**，多模态推理能力较 GPT-5 提升约 5 个百分点。
+
+### 6.6 多模态架构演进总结
 
 | 阶段 | 代表 | 视觉 | 音频 | 视频 | 工程模式 |
 |---|---|---|---|---|---|
@@ -411,32 +552,33 @@ GPT-5 在多模态评测上：
 | GPT-4o (2024.05) | GPT-4o | 原生 patch token | 原生音频 token | 短帧序列 | 统一 token 流，端到端 |
 | Sora (2024.12) | Sora DiT | spacetime patches 反向生成 | 无 | 文 → 视频生成 | DiT，独立模型 |
 | GPT-5 (2025.08) | GPT-5 router | 同 4o + 推理增强 | 同 4o realtime | 演示级 | 多模态 + reasoning 合流 |
+| GPT-5.5 (2026.04) | GPT-5.5 native | 原生 patch token + 预训练融合 | Realtime-2 ~200ms | 30min 理解 / 60s 生成 | 原生全模态统一 token 流 |
 
 > 一个重要观察：**GPT-4o 之后，OpenAI 已不再发表独立的「多模态架构论文」**。一切技术都走 System Card 路径，结合产品发布节奏；这与 Google 在 Gemini / Anthropic 在 Claude 上的策略类似——架构成为商业秘密，能力以评测和产品形态对外。
 
 ---
 
-## 6. 跨代技术演进分析
+## 7. 跨代技术演进分析
 
-### 6.1 七条主线的演进图
+### 7.1 七条主线的演进图
 
 ```
-1) 架构主线：       Decoder Transformer (GPT-1) → Pre-LN + 大词表 (GPT-2) → 175B Dense (GPT-3) → MoE? (GPT-4*) → Omnimodal (GPT-4o) → Router (GPT-5)
+1) 架构主线：       Decoder Transformer (GPT-1) → Pre-LN + 大词表 (GPT-2) → 175B Dense (GPT-3) → MoE? (GPT-4*) → Omnimodal (GPT-4o) → Router (GPT-5) → Native Omnimodal (GPT-5.5)
 2) 数据主线：       BookCorpus → WebText → CC + Books → 多模态 + 代码 + 合成数据
 3) 计算主线：       2.6e19 → 1.5e21 → 3.14e23 → ~2e25*  → ?  (* 指 GPT-4 的推测算力)
-4) 适配主线：       Fine-tuning (GPT-1) → Zero-shot (GPT-2) → Few-shot ICL (GPT-3) → SFT+RLHF (ChatGPT) → RL on CoT (o1)
-5) 多模态主线：     纯文本 → CLIP/DALL·E 分支 → GPT-4V 串联 → GPT-4o native → Sora world model → GPT-5 multimodal reasoning
+4) 适配主线：       Fine-tuning (GPT-1) → Zero-shot (GPT-2) → Few-shot ICL (GPT-3) → SFT+RLHF (ChatGPT) → RL on CoT (o1) → Native Omnimodal RL (GPT-5.5)
+5) 多模态主线：     纯文本 → CLIP/DALL·E 分支 → GPT-4V 串联 → GPT-4o native → Sora world model → GPT-5 multimodal reasoning → GPT-5.5 native omnimodal
 6) 对齐主线：       无 → 不开源治理 (GPT-2) → SFT (FeedME) → RLHF → RBR/RLAIF → Deliberative Alignment
-7) 商业主线：       论文+权重 → 论文+API → 仅 API → 闭源 + System Card + Router 套餐
+7) 商业主线：       论文+权重 → 论文+API → 仅 API → 闭源 + System Card + Router 套餐 → 模型退役 + 统一入口 (2026)
 ```
 
-### 6.2 三次范式跃迁的判断
+### 7.2 三次范式跃迁的判断
 
 1. **Pre-train-and-prompt 取代 Pre-train-and-fine-tune**（2019-2020）：GPT-2/3 用 ICL 把 NLP 从「每任务一个模型」变成「一个模型应对所有任务」。
 2. **RLHF 取代 SFT 作为产品对齐方法**（2022）：InstructGPT/ChatGPT 证明对齐对最终用户效用的杠杆远大于参数；自此所有竞品（Claude、Gemini、LLaMA-Chat、Qwen-Instruct）都把 RLHF/DPO 系列方法视为标配。
 3. **Test-time compute 作为新的 scaling 轴**（2024-2025）：o1 把推理时长变成可投入资源；这使「同尺寸模型 + 更多思考时间」可以解决以前需要更大模型才能解决的问题，给行业打开第二增长曲线。
 
-### 6.3 OpenAI 公开节奏的演化
+### 7.3 OpenAI 公开节奏的演化
 
 | 年份 | 公开级别 | 代表 |
 |---|---|---|
@@ -446,81 +588,109 @@ GPT-5 在多模态评测上：
 | 2022 | 完整论文（仅对齐方法）+ 仅 API | InstructGPT |
 | 2023+ | Tech Report / System Card，无架构与数据 | GPT-4 / 4o / o1 / GPT-5 |
 | 2025+ | 仅 changelog + System Card + 评测 | GPT-4.1 / GPT-5 子版本 |
+| 2026+ | System Card + 模型退役公告 + 统一入口 | GPT-5.5 / Instant / Pro |
 
 > 这一趋势既是商业护城河选择，也对学术复现造成了真实障碍。GPT-3 是最后一个「学界可深度复现路径」的 OpenAI 旗舰；之后行业实际复现工作转移到 Meta (LLaMA)、Mistral、Qwen、DeepSeek 等开源阵营。
 
-### 6.4 OpenAI 与开源阵营的相对位置
+### 7.4 OpenAI 与开源阵营的相对位置
 
-- **基座规模**：开源端的 LLaMA-3 405B、DeepSeek-V3 671B、Qwen3-235B 等已在公开权重上接近 GPT-4 级，**但 OpenAI 旗舰仍领先于「智能密度」与「指令/工具一致性」**（评测口径有争议）。
-- **推理模型**：DeepSeek-R1（2025-01）、Qwen3-Thinking、Kimi k1.5 都用类似 RL on CoT 路径追上 o1；o3/o4 在 ARC-AGI 等极硬任务上仍领先。
-- **多模态**：开源阵营追赶最快的环节；Qwen3-Omni / Kimi-VL-Thinking 在视觉理解上接近 GPT-4o，但 realtime audio 与 video 生成（Sora 级）仍保持代差。
+- **基座规模**：开源端的 LLaMA-3 405B、DeepSeek-V3 671B、Qwen3-235B 等已在公开权重上接近 GPT-4 级，**但 OpenAI 旗舰仍领先于「智能密度」与「指令/工具一致性」**（评测口径有争议）。GPT-5.5（2026-04）进一步拉大差距，SWE-bench 79.4% 与原生全模态能力短期内无开源对标。
+- **推理模型**：DeepSeek-R1（2025-01）、Qwen3-Thinking、Kimi k1.5 都用类似 RL on CoT 路径追上 o1；o3/o4 在 ARC-AGI 等极硬任务上仍领先。2026 年 o3 退役后，GPT-5.5 thinking mode 成为 OpenAI 唯一推理入口。
+- **多模态**：开源阵营追赶最快的环节；Qwen3-Omni / Kimi-VL-Thinking 在视觉理解上接近 GPT-4o，但 realtime audio（GPT-Realtime-2 ~200ms）与 video 生成（Sora 2.0 60s 1080p）仍保持代差。GPT-5.5 的原生全模态预训练进一步巩固领先。
 
 ---
 
-## 7. 关键创新点（按行业影响力排序）
+## 8. 模型退役计划
+
+OpenAI 于 2026 年 2 月 13 日公布首批大规模模型退役时间表，标志着产品线的集中化与简化：
+
+| 退役日期 | 模型 | 替代方案 | 影响说明 |
+|---|---|---|---|
+| 2026-02-13（即时） | GPT-4o / GPT-4.1 / o4-mini | GPT-5.3 Instant / GPT-5.4 mini | 开发者需迁移 API 调用 |
+| 2026-06-27 | GPT-4.5 | GPT-5.5 / GPT-5.5 Instant | ChatGPT Plus/Pro 用户自动切换 |
+| 2026-08-26 | o3 / o3-mini | GPT-5.5 thinking mode | 推理模型完全并入 GPT-5.5 统一入口 |
+
+**退役逻辑**：
+1. **统一入口**：GPT-5.5 的 router 已覆盖从 nano 到 Pro 的全档位，旧模型维护成本高于收益；
+2. **安全合规**：o3/o4-mini 等旧推理模型的 deliberative alignment 版本落后于 GPT-5.5，存在潜在安全风险；
+3. **算力再分配**：退役模型释放的推理集群用于 GPT-5.5 Instant 的默认模型扩容。
+
+**开发者迁移建议**：
+- GPT-4o/4.1 用户 → GPT-5.5 Instant（价格相近，能力大幅提升）；
+- o3/o4-mini 用户 → GPT-5.5 并调高 `reasoning_effort` 参数；
+- GPT-4.5 用户 → GPT-5.5 Pro API（企业级 SLA 保障）。
+
+---
+
+## 9. 关键创新点（按行业影响力排序）
 
 > 排序基于「对全行业范式的重塑程度」，而非单点性能。
 
-### 7.1 In-Context Few-Shot Learning（GPT-3, 2020）
+### 9.1 In-Context Few-Shot Learning（GPT-3, 2020）
 
 - **影响力级别**：★★★★★（重塑 NLP 范式）
 - **贡献**：首次在工业规模上证明「prompt 即学习」，使 LLM 成为通用接口。所有后续 instruction-tuning、RLHF、Agent 框架都建立在 ICL 之上。
 - **学术地位**：NeurIPS 2020 Best Paper；改变了 NLP 学界的研究语言。
 
-### 7.2 RLHF 三步法（InstructGPT/ChatGPT, 2022）
+### 9.2 RLHF 三步法（InstructGPT/ChatGPT, 2022）
 
 - **影响力级别**：★★★★★（让 LLM 可商用化）
 - **贡献**：把对齐做成工程流水线（SFT → RM → PPO），引爆 ChatGPT 现象；之后 *人人都做 RLHF*。
 - **副作用**：催生整个 RLHF 生态（DPO、IPO、KTO、ORPO、GRPO 等改进算法）。
 
-### 7.3 Test-time Compute Scaling（o1, 2024）
+### 9.3 Test-time Compute Scaling（o1, 2024）
 
 - **影响力级别**：★★★★★（开辟第二增长曲线）
 - **贡献**：在「数据/参数 scaling 接近瓶颈」的舆论中，给出 *test-time scaling* 这条新维度，让 LLM 能力增长继续可预测。
 - **派生**：deliberative alignment、verifier-augmented decoding、tree-of-thought 全面被推上工业落地。
 
-### 7.4 Native Omnimodal Token Stream（GPT-4o, 2024）
+### 9.4 Native Omnimodal Token Stream（GPT-4o, 2024）
 
 - **影响力级别**：★★★★☆
 - **贡献**：以单模型端到端处理 text/audio/image/video，把语音助手延迟从秒级压到 ~300 ms；成为后续多模态原生模型（Gemini 2.x、Qwen-Omni 等）的标杆。
 
-### 7.5 Predictive Scaling Laws（GPT-4 Tech Report, 2023）
+### 9.5 Predictive Scaling Laws（GPT-4 Tech Report, 2023）
 
 - **影响力级别**：★★★★☆
 - **贡献**：把训练损失从 1000× 较小算力外推预测，是 *工程化 scaling law* 的首次公开例证；让大型训练任务的预算与风险可估算。
 
-### 7.6 Decoder-only Transformer + LM 预训练（GPT-1, 2018）
+### 9.6 Decoder-only Transformer + LM 预训练（GPT-1, 2018）
 
 - **影响力级别**：★★★★☆
 - **贡献**：奠定了 *Decoder-only + autoregressive LM* 这一今日所有大模型默认的架构范式。
 
-### 7.7 Spec-First Alignment / Deliberative Alignment（2024）
+### 9.7 Spec-First Alignment / Deliberative Alignment（2024）
 
 - **影响力级别**：★★★☆☆
 - **贡献**：把对齐从「奖励函数形状」转为「显式的 Spec + 模型自我推理」，使对齐过程可审计、可演进。
 
-### 7.8 Reasoning Effort 作为 API 一等公民（o3-mini, 2025）
+### 9.8 Reasoning Effort 作为 API 一等公民（o3-mini, 2025）
 
 - **影响力级别**：★★★☆☆
 - **贡献**：第一次把「思考多久」做成开发者旋钮（low/medium/high），使「推理预算」与「token 预算」并列为产品能力。
 
-### 7.9 GPT-5 Router：模型形态合流（2025）
+### 9.9 GPT-5 Router：模型形态合流（2025）
 
 - **影响力级别**：★★★☆☆（待观察）
 - **贡献**：把 chat 模型与 reasoning 模型合并为一个产品入口，预示未来旗舰将以「模型集群 + 路由」为基本单位，而非单一权重。
 
-### 7.10 长上下文 + JSON Mode + Function Calling（GPT-4 Turbo, 2023）
+### 9.10 GPT-5.5 原生全模态预训练（2026）
+
+- **影响力级别**：★★★★☆
+- **贡献**：自 GPT-4o 以来首次在预训练阶段即融合文本、图像、音频、视频 token，而非后训练拼接；为行业展示「原生 omnimodal」作为下一代基座标准。
+
+### 9.11 长上下文 + JSON Mode + Function Calling（GPT-4 Turbo, 2023）
 
 - **影响力级别**：★★☆☆☆（产品级标准化）
 - **贡献**：把 LangChain 等中间层标准化进 API，是 LLM-as-OS 概念的工程化先声。
 
 ---
 
-## 8. 参考文献
+## 10. 参考文献
 
 > 引用规则：论文优先标注 arXiv 编号；OpenAI 博客与 System Card 仅给标题与日期，可据此搜索。
 
-### 8.1 OpenAI 一手论文 / 报告
+### 10.1 OpenAI 一手论文 / 报告
 
 1. Radford, A. et al. *Improving Language Understanding by Generative Pre-Training* (GPT-1). OpenAI Tech Report, 2018-06-11.
 2. Radford, A. et al. *Language Models are Unsupervised Multitask Learners* (GPT-2). OpenAI Tech Report, 2019-02-14.
@@ -544,24 +714,45 @@ GPT-5 在多模态评测上：
 20. OpenAI. *Model Spec*. 2024-05（持续更新）。
 21. Mu, T. et al. *Rule-Based Rewards for Language Model Safety*. OpenAI 2024.
 
-### 8.2 直接相关 OpenAI / 学术工作
+22. OpenAI. *Introducing GPT-5.1*. 2025-11-12 blog.
+23. OpenAI. *Introducing GPT-5.2 and GPT-5.2-Codex*. 2025-12-11 / 12-18 blog.
+24. OpenAI. *Introducing GPT-5.3-Codex and Codex-Spark*. 2026-02-05 / 02-12 blog.
+25. OpenAI. *Introducing GPT-5.4 and GPT-5.4 mini/nano*. 2026-03-05 / 03-17 blog.
+26. OpenAI. *GPT-5.4-Cyber: Security-Focused Model*. 2026-04-15 blog.
+27. OpenAI. *GPT-Rosalind: Life Sciences Reasoning*. 2026-04-16 blog.
+28. OpenAI. *Introducing GPT-5.5 (Spud)*. 2026-04-23 blog.
+29. OpenAI. *GPT-5.5 System Card*. 2026-04-24.
+30. OpenAI. *GPT-5.5 Instant: New Default Model*. 2026-05-05 blog.
+31. OpenAI. *GPT-Realtime-2, GPT-Translate, Whisper v4*. 2026-05-07 blog.
+32. OpenAI. *Daybreak: AI-Powered Cyber Defense*. 2026-05-11 blog.
+33. OpenAI. *ChatGPT Images 2.0*. 2026-04-21 blog.
+34. OpenAI. *Workspace Agents for Teams*. 2026-04-22 blog.
+35. OpenAI. *Advanced Account Security*. 2026-05-01 blog.
+36. OpenAI. *Personal Finance Experience in ChatGPT*. 2026-05-14 blog.
+37. OpenAI. *Codex Sites: Build Websites with Natural Language*. 2026-06-02 blog.
+38. OpenAI. *Model Deprecation Notice: GPT-4o, GPT-4.1, o4-mini*. 2026-02-13.
+39. OpenAI. *Model Deprecation Notice: GPT-4.5*. 2026-06-27.
+40. OpenAI. *Model Deprecation Notice: o3*. 2026-08-26.
 
-22. Vaswani, A. et al. *Attention Is All You Need*. **arXiv:1706.03762**, 2017.
-23. Kaplan, J. et al. *Scaling Laws for Neural Language Models*. **arXiv:2001.08361**, 2020.
-24. Hoffmann, J. et al. *Training Compute-Optimal Large Language Models* (Chinchilla). **arXiv:2203.15556**, 2022.
-25. Wei, J. et al. *Chain-of-Thought Prompting Elicits Reasoning in Large Language Models*. **arXiv:2201.11903**, 2022.
-26. Wei, J. et al. *Emergent Abilities of Large Language Models*. **arXiv:2206.07682**, 2022.
-27. Bai, Y. et al. (Anthropic). *Constitutional AI: Harmlessness from AI Feedback*. **arXiv:2212.08073**, 2022.
-28. Snell, C. et al. *Scaling LLM Test-Time Compute Optimally...*. **arXiv:2408.03314**, 2024.
-29. DeepSeek-AI. *DeepSeek-R1*. **arXiv:2501.12948**, 2025-01.
-30. Chollet, F. *On the Measure of Intelligence* (ARC). **arXiv:1911.01547**, 2019.
+### 10.2 直接相关 OpenAI / 学术工作
 
-### 8.3 第三方分析 / 产业分析（推测来源，仅作背景）
+41. Vaswani, A. et al. *Attention Is All You Need*. **arXiv:1706.03762**, 2017.
+42. Kaplan, J. et al. *Scaling Laws for Neural Language Models*. **arXiv:2001.08361**, 2020.
+43. Hoffmann, J. et al. *Training Compute-Optimal Large Language Models* (Chinchilla). **arXiv:2203.15556**, 2022.
+44. Wei, J. et al. *Chain-of-Thought Prompting Elicits Reasoning in Large Language Models*. **arXiv:2201.11903**, 2022.
+45. Wei, J. et al. *Emergent Abilities of Large Language Models*. **arXiv:2206.07682**, 2022.
+46. Bai, Y. et al. (Anthropic). *Constitutional AI: Harmlessness from AI Feedback*. **arXiv:2212.08073**, 2022.
+47. Snell, C. et al. *Scaling LLM Test-Time Compute Optimally...*. **arXiv:2408.03314**, 2024.
+48. DeepSeek-AI. *DeepSeek-R1*. **arXiv:2501.12948**, 2025-01.
+49. Chollet, F. *On the Measure of Intelligence* (ARC). **arXiv:1911.01547**, 2019.
 
-31. SemiAnalysis (Dylan Patel) 关于 GPT-4 的 MoE 架构分析（博客文章，2023-07）。
-32. George Hotz (geohot) 关于 GPT-4 8×220B 的公开陈述（2023 年播客）。
-33. Epoch AI Frontier Math 评测、ARC-AGI 公共榜单（2024-2025）。
-34. SWE-bench Verified、Aider Polyglot、GPQA Diamond 等学术 / 社区评测榜单（2023-2025）。
+### 10.3 第三方分析 / 产业分析（推测来源，仅作背景）
+
+50. SemiAnalysis (Dylan Patel) 关于 GPT-4 的 MoE 架构分析（博客文章，2023-07）。
+51. George Hotz (geohot) 关于 GPT-4 8×220B 的公开陈述（2023 年播客）。
+52. Epoch AI Frontier Math 评测、ARC-AGI 公共榜单（2024-2025）。
+53. SWE-bench Verified、Aider Polyglot、GPQA Diamond 等学术 / 社区评测榜单（2023-2025）。
+54. SemiAnalysis (Dylan Patel) 关于 GPT-5.5 架构与定价分析（博客文章，2026-04）。
 
 ---
 

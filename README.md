@@ -29,7 +29,8 @@
 | 9 | 🇺🇸 | [**LLaMA**](./LLaMA-research/) | Meta | 1 | 开源模型生态与技术架构 |
 | 10 | 🇨🇳 | [**MiMo**](./MiMo-research/) | 小米 | 1 | 端侧部署与小模型优化方向 |
 | 11 | 🇨🇳 | [**MiniMax**](./MiniMax-research/) | MiniMax | 1 | 多模态与语音能力调研 |
-| 12 | 🇨🇳 | [**Qwen**](./Qwen-research/) | 阿里 | 4 | 文本 + VL + Omni + 生态，覆盖面最广 |
+| 12 | 🇺🇸 | [**Nemotron**](./Nemotron-research/) | NVIDIA | 1 | 混合Mamba架构、合成数据、Agentic高效推理 |
+| 13 | 🇨🇳 | [**Qwen**](./Qwen-research/) | 阿里 | 4 | 文本 + VL + Omni + 生态，覆盖面最广 |
 
 > **🇨🇳 国内 8 家** &nbsp;|&nbsp; **🇺🇸 海外 4 家** &nbsp;|&nbsp; 共 **20 份** Markdown 报告
 

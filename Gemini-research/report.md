@@ -1,7 +1,7 @@
 # Google Gemini系列模型深度调研报告
 
-> 调研日期：2026年6月  
-> 覆盖范围：从PaLM（2022年）到Gemini 3.1（2026年）的完整技术演进  
+> 调研日期：2026年6月5日
+> 覆盖范围：从PaLM（2022年）到Gemini 3.5（2026年）的完整技术演进  
 > 写作原则：以**架构演进路径**为骨架，突出原生多模态、超长上下文、MoE与推理能力四大技术主线
 
 ---
@@ -43,12 +43,16 @@ Google的大语言模型系列经历了从PaLM到Gemini的重大战略转型。P
 ├── 06月  Gemini 2.5 Flash       高效Thinking模型，平衡速度与成本
 ├── 06月  Gemini 2.5 Flash-Lite  最低延迟与成本的2.5系列变体
 ├── 11月  Gemini 3 Pro           最智能模型，LMArena 1501 Elo，1M/64K输入输出
-└── 11月  Gemini 3 Deep Think    增强推理模式，GPQA 93.8%，ARC-AGI-2 45.1%
+├── 11月  Gemini 3 Deep Think    增强推理模式，GPQA 93.8%，ARC-AGI-2 45.1%
+└── 12月  Gemini 3 Flash         高效旗舰，1M上下文，原生多模态输出
 
 2026年 ── 持续突破
 ├── 02月  Gemini 3.1 Deep Think  金牌级学术推理，物理/数学奥赛水平
-├── 02月  Gemini 3.1 Pro         全面超越3 Pro，推理/多模态/Agent全面提升
-└── 06月  最新进展               Gemini 3系列持续迭代优化中
+├── 02月  Gemini 3.1 Pro         前沿推理模型，ARC AGI 2 达77.1%
+├── 05月  Gemini 3.1 Flash Lite  轻量高效版，1M上下文
+├── 05月  Gemini 3.5 Flash       Google I/O发布，编码和代理工作流优化，速度4倍快
+├── 05月  Gemini Omni Flash      全模态模型，支持视频输出，集成YouTube Shorts
+└── 06月  Gemini 3.5 Pro         发布预告，新一代旗舰
 ```
 
 ### 1.3 技术代际划分
@@ -59,7 +63,7 @@ Google的大语言模型系列经历了从PaLM到Gemini的重大战略转型。P
 | **原生多模态期** | 2023.12–2024.01 | Gemini 1.0 Ultra/Pro/Nano | 原生多模态联合训练 + 32K上下文 | 首次多任务超越GPT-4 |
 | **长上下文+MoE期** | 2024.02–2024.11 | Gemini 1.5 Pro/Flash | Sparse MoE + 1M→10M上下文 + 高效蒸馏 | 长上下文+效率双突破 |
 | **Agentic+推理期** | 2024.12–2025.11 | Gemini 2.0/2.5/3 | Thinking模式 + 原生工具调用 + 多模态输出 | Agent时代到来 |
-| **深度推理期** | 2025.11– | Gemini 3/3.1 Deep Think | Deep Think增强推理 + 长程规划 + 1501 Elo | AGI前沿探索 |
+| **深度推理期** | 2025.11– | Gemini 3/3.1/3.5 Deep Think | Deep Think增强推理 + 长程规划 + 1501 Elo + 全模态输出 | AGI前沿探索 |
 
 ---
 
@@ -264,11 +268,11 @@ Gemini 1.5 Pro的MoE是这些研究的集大成者，实现了：
 - 2.5系列中最低延迟和成本
 - 面向成本敏感的大规模部署
 
-### 2.8 Gemini 3 Pro / Deep Think（2025年11月）
+### 2.8 Gemini 3 Pro / Deep Think / Flash（2025年11月–12月）
 
-**定位**：Google迄今最智能模型。
+**定位**：Google迄今最智能模型系列。
 
-**关键指标**：
+**Gemini 3 Pro（2025-11-18）**：
 - **LMArena**: 1501 Elo（突破性分数）
 - **GPQA Diamond**: 91.9%（PhD级推理）
 - **Humanity's Last Exam**: 37.5%（无工具）
@@ -279,36 +283,78 @@ Gemini 1.5 Pro的MoE是这些研究的集大成者，实现了：
 - **SWE-bench Verified**: 76.2%
 - **WebDev Arena**: 1487 Elo
 - **Terminal-Bench 2.0**: 54.2%
+- **上下文窗口**：1M输入 + 64K输出
 
-**上下文窗口**：1M输入 + 64K输出
+**Gemini 3 Flash（2025-12-17）**：
+- 高效旗舰变体，1M token上下文窗口
+- 原生多模态输出能力
+- 在速度和成本上优化，适合大规模部署
 
-**Gemini 3 Deep Think**：
+**Gemini 3 Deep Think（2026-02-12）**：
 - 增强推理模式，比3 Pro更进一步
 - Humanity's Last Exam: 41.0%
 - GPQA Diamond: 93.8%
 - **ARC-AGI-2: 45.1%**（with code execution，验证集）
 - 解决高度新颖的挑战
 
-**Gemini 3.1 Pro & Deep Think（2026年初）**：
+**Gemini 3.1 Pro（2026-02-19）**：
+- 前沿推理模型，全面超越3 Pro
+- **ARC-AGI-2 达77.1%**，推理能力大幅提升
+- 推理、多模态、Agent能力全面提升
+- 1M token上下文窗口
+
+**Gemini 3.1 Deep Think（2026年初）**：
 - 全面超越3 Pro
 - Deep Think Feb 2026变体达到金牌级学术推理
 - 2025年国际物理奥林匹克笔试金牌水平
 
-### 2.9 跨代架构对比表
+### 2.9 Gemini 3.5系列与Omni Flash（2026年5月–6月）
 
-| 组件 | PaLM (2022) | PaLM 2 (2023) | Gemini 1.0 (2023.12) | Gemini 1.5 (2024.02) | Gemini 2.0 (2024.12) | Gemini 2.5 (2025.03) | Gemini 3 (2025.11) |
-|------|-------------|---------------|----------------------|----------------------|----------------------|----------------------|--------------------|
-| 架构 | Dense Decoder | Dense Decoder | Dense Decoder | **Sparse MoE** | MoE/Dense | MoE | MoE |
-| 注意力 | MQA | MQA | MHA/MQA | MoE+MHA | MoE+MHA | MoE+MHA | MoE+MHA |
-| 位置编码 | RoPE | RoPE | RoPE | RoPE | RoPE | RoPE | RoPE |
-| FFN | SwiGLU | SwiGLU | GeGLU | MoE-GeGLU | MoE-GeGLU | MoE-GeGLU | MoE-GeGLU |
-| 归一化 | Pre-RMSNorm | Pre-RMSNorm | Pre-RMSNorm | Pre-RMSNorm | Pre-RMSNorm | Pre-RMSNorm | Pre-RMSNorm |
-| 词表 | 256K SP | 256K SP | 256K SP | 256K SP | 256K SP | 256K SP | 256K SP |
-| 上下文 | 2K→8K | 8K→32K | 32K | **1M (10M实验)** | 1M | 1M (2M开放) | 1M/64K输出 |
-| 多模态 | 纯文本 | 纯文本 | **原生多模态** | 原生多模态 | **原生输出** | 原生输出 | 原生输出 |
-| 推理模式 | — | — | — | — | Flash Thinking | **Thinking** | **Deep Think** |
-| 训练硬件 | TPU v4 | TPU v4 | TPU v4 | TPU v4 | **TPU v6e** | TPU v6e+ | TPU v6e+ |
-| 激活参数 | 540B (全量) | 未公布 | 未公布 | 部分激活 | 部分激活 | ~40B | 未公布 |
+**Gemini 3.5 Flash（2026-05-19）**：
+- **发布场合**：Google I/O 2026
+- **定位**：新工作马，编码和代理工作流优化
+- **性能**：比Gemini 3.1 Pro在编码和代理基准上更强
+- **速度**：4倍快于前代旗舰
+- **成本**：1/3 of GPT-5.5
+- **上下文窗口**：1M token
+
+**Gemini Omni Flash（2026-05-19）**：
+- **定位**：全模态模型
+- **关键能力**：支持视频输出（原生视频生成）
+- **集成**：已集成到YouTube Shorts
+- **上下文窗口**：1M token
+
+**Gemini 3.5 Pro（2026-06 announced）**：
+- 6月发布预告，新一代旗舰
+- 预计继承3.5 Flash的编码/代理优化并扩展至全能力维度
+
+### 2.10 思考级别与上下文统一
+
+**4个思考级别**：
+所有Gemini 3/3.1/3.5系列模型均支持4级思考控制：
+- **minimal**：最小思考，最低延迟
+- **low**：低思考深度，平衡速度
+- **medium**：中等思考深度（默认）
+- **high**：最大思考深度，最佳推理质量
+
+**统一1M token上下文**：
+从Gemini 3系列开始，所有模型（Pro/Flash/Deep Think/Omni）均标配1M token上下文窗口，实现长文档、长视频、长代码库的统一处理。
+
+### 2.11 跨代架构对比表
+
+| 组件 | PaLM (2022) | PaLM 2 (2023) | Gemini 1.0 (2023.12) | Gemini 1.5 (2024.02) | Gemini 2.0 (2024.12) | Gemini 2.5 (2025.03) | Gemini 3 (2025.11) | Gemini 3.1 (2026.02) | Gemini 3.5 (2026.05) |
+|------|-------------|---------------|----------------------|----------------------|----------------------|----------------------|--------------------|----------------------|----------------------|
+| 架构 | Dense Decoder | Dense Decoder | Dense Decoder | **Sparse MoE** | MoE/Dense | MoE | MoE | MoE | MoE |
+| 注意力 | MQA | MQA | MHA/MQA | MoE+MHA | MoE+MHA | MoE+MHA | MoE+MHA | MoE+MHA | MoE+MHA |
+| 位置编码 | RoPE | RoPE | RoPE | RoPE | RoPE | RoPE | RoPE | RoPE | RoPE |
+| FFN | SwiGLU | SwiGLU | GeGLU | MoE-GeGLU | MoE-GeGLU | MoE-GeGLU | MoE-GeGLU | MoE-GeGLU | MoE-GeGLU |
+| 归一化 | Pre-RMSNorm | Pre-RMSNorm | Pre-RMSNorm | Pre-RMSNorm | Pre-RMSNorm | Pre-RMSNorm | Pre-RMSNorm | Pre-RMSNorm | Pre-RMSNorm |
+| 词表 | 256K SP | 256K SP | 256K SP | 256K SP | 256K SP | 256K SP | 256K SP | 256K SP | 256K SP |
+| 上下文 | 2K→8K | 8K→32K | 32K | **1M (10M实验)** | 1M | 1M (2M开放) | **1M统一** | **1M统一** | **1M统一** |
+| 多模态 | 纯文本 | 纯文本 | **原生多模态** | 原生多模态 | **原生输出** | 原生输出 | 原生输出 | 原生输出 | **原生视频输出** |
+| 推理模式 | — | — | — | — | Flash Thinking | **Thinking** | **Deep Think** | **Deep Think** | **4级思考** |
+| 训练硬件 | TPU v4 | TPU v4 | TPU v4 | TPU v4 | **TPU v6e** | TPU v6e+ | TPU v6e+ | TPU v7 | TPU v7 |
+| 激活参数 | 540B (全量) | 未公布 | 未公布 | 部分激活 | 部分激活 | ~40B | 未公布 | 未公布 | 未公布 |
 
 ---
 
@@ -426,7 +472,8 @@ Sparse MoE架构天然有利于长上下文：
 | Claude 2.1 | 200K | 98%（at 200K） |
 | GPT-4 Turbo | 128K | 支持 |
 | Gemini 2.5 Pro | 1M (2M rolling) | — |
-| Gemini 3 Pro | 1M | — |
+| Gemini 3/3.1/3.5 系列 | **1M统一** | — |
+| Gemini Omni Flash | **1M + 视频输出** | — |
 
 ---
 
@@ -439,7 +486,8 @@ Gemini 1.0/1.5:    标准自回归生成（无显式推理）
 Gemini 2.0 Flash Thinking (2024.12):  实验性Thinking模式
 Gemini 2.5 Pro/Flash (2025.03/06):    正式Thinking Model
 Gemini 3 Pro (2025.11):               SOTA推理 + Deep Think模式
-Gemini 3.1 Deep Think (2026.02):      金牌级学术推理
+Gemini 3.1 Pro (2026.02):             前沿推理，ARC AGI-2 77.1%
+Gemini 3.5 Flash (2026.05):           4级思考控制（minimal/low/medium/high）
 ```
 
 ### 5.2 Gemini 2.0 Flash Thinking
@@ -609,6 +657,7 @@ Gemini 1.0:          原生多模态理解（文本+图像+音频+视频输入�
 Gemini 1.5:          原生多模态 + 超长多模态上下文
 Gemini 2.0:          原生多模态输入 + 原生多模态输出（图像/音频生成）
 Gemini 2.5/3:        全模态理解+生成 + 工具调用
+Gemini 3.5/Omni:     全模态理解+生成 + 原生视频输出 + YouTube集成
 ```
 
 ### 7.3 推理能力的跃迁
@@ -619,6 +668,8 @@ Gemini 2.5/3:        全模态理解+生成 + 工具调用
 | 显式推理 | 2.0 Flash Thinking | Thinking trace | 可见思考过程 |
 | 深度推理 | 2.5 Pro | Dynamic Thinking | 自适应推理深度 |
 | 专家推理 | 3 Deep Think | Extended Deep Think | 奥赛金牌级 |
+| 前沿推理 | 3.1 Pro | ARC AGI-2 77.1% | 接近人类水平 |
+| 工作马优化 | 3.5 Flash | 4级思考 + 编码/代理优化 | 速度4×，成本1/3 GPT-5.5 |
 
 ### 7.4 从对话到Agent
 
@@ -627,6 +678,7 @@ Gemini 1.0/1.5:   被动响应式对话
 Gemini 2.0:       原生工具调用 → "Agentic Era"开端
 Gemini 2.5:       长程规划 + 持续推理
 Gemini 3:         自主多步骤任务执行（SWE-bench 76.2%）+ Vending-Bench长程规划SOTA
+Gemini 3.5 Flash: 编码和代理工作流优化，比3.1 Pro在编码/代理基准上更强
 ```
 
 ### 7.5 TPU硬件协同演进
@@ -725,7 +777,11 @@ Gemini 3:         自主多步骤任务执行（SWE-bench 76.2%）+ Vending-Benc
 
 20. Google DeepMind (2026). **Gemini 3.1 Pro / Deep Think Model Card.** deepmind.google/models.
 
-21. Hassabis, D. (2025). *Our vision for building a universal AI assistant.* blog.google/technology/google-deepmind.
+21. Google Blog (2026). *Gemini 3.5 Flash: Our fastest model for coding and agents.* blog.google, May 2026.
+
+22. Google Blog (2026). *Gemini Omni Flash: Native video generation comes to YouTube Shorts.* blog.google, May 2026.
+
+23. Hassabis, D. (2025). *Our vision for building a universal AI assistant.* blog.google/technology/google-deepmind.
 
 ---
 

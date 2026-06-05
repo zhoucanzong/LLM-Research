@@ -1,7 +1,7 @@
 # Kimi 系列模型深度调研报告
 
 > 调研对象：Moonshot AI（月之暗面）的 Kimi 模型家族
-> 时间跨度：2023 年 10 月 ~ 2026 年 1 月
+> 时间跨度：2023 年 10 月 ~ 2026 年 6 月
 > 资料来源：arXiv 论文、Moonshot AI 官方技术博客、HuggingFace 模型卡、GitHub 仓库
 > 撰写日期：2026 年 6 月
 
@@ -13,7 +13,7 @@ Moonshot AI（月之暗面，Beijing Yuezhi Technology Co., Ltd.）由清华大�
 
 1. **长上下文主线**：Moonshot-v1（200K）→ 2M 字符内测 → **MoBA**（块级稀疏注意力）→ **Kimi Linear / KDA**（线性注意力混合架构），系统性回答「如何让 Transformer 真正吃下百万 token」。
 2. **推理（Reasoning）主线**：**Kimi k1**（2024.11，多模态思考预览）→ **Kimi k1.5**（2025.01，对标 OpenAI o1）→ **Kimi K2 Thinking**（2025.11，对标 GPT-5、Claude Sonnet 4.5），形成「以长上下文 RL + Long2Short」为核心的独特路线。
-3. **基础模型与多模态主线**：**Moonlight 16B-A3B**（2025.02，首个用 Muon 优化器训练的 MoE）→ **Kimi-VL / Kimi-VL-Thinking**（2025.04）→ **Kimi-Audio**（2025.04）→ **Kimi K2 1T-A32B**（2025.07，开源「Open Agentic Intelligence」）→ **Kimi K2.5**（2026.01，原生多模态 Agent）→ **Kimi K2.6**（2026.05+，长程编码 / 多 Agent 集群）。
+3. **基础模型与多模态主线**：**Moonlight 16B-A3B**（2025.02，首个用 Muon 优化器训练的 MoE）→ **Kimi-VL / Kimi-VL-Thinking**（2025.04）→ **Kimi-Audio**（2025.04）→ **Kimi K2 1T-A32B**（2025.07，开源「Open Agentic Intelligence」）→ **Kimi K2.5**（2026.01，原生多模态 Agent）→ **Kimi K2.6**（2026.04，开源编码/多 Agent 集群旗舰）→ **K2 系列退役**（2026.05）。
 
 ### 1.1 关键时间线
 
@@ -32,8 +32,11 @@ Moonshot AI（月之暗面，Beijing Yuezhi Technology Co., Ltd.）由清华大�
 | 2025-07-22 | **Kimi K2** 开源（arXiv:2507.20534） | 1T 总 / 32B 激活 MoE，**MuonClip** 优化器 |
 | 2025-10-30 | **Kimi Linear** 论文（arXiv:2510.26692） | KDA + MLA 3:1 混合，1M 上下文 6× 解码加速 |
 | 2025-11-06 | **Kimi K2 Thinking** 发布 | 1T MoE + 256K 上下文 + 原生 INT4，HLE 44.9%（带工具） |
-| 2026-01 | **Kimi K2.5** | 在 K2 基础上继续预训练 ~15T 视觉-文本 token，原生多模态 Agent |
-| 2026-05+ | **Kimi K2.6** | 13 小时连续编码、300 子 Agent 集群（官方披露） |
+| 2026-01-27 | **Kimi K2.5** | 在 K2 基础上继续预训练 ~15T 视觉-文本 token，原生多模态 Agent，Agent Swarm 100 子代理 |
+| 2026-04-13 | **Kimi Code K2.6** | 编码代理工具发布 |
+| 2026-04-20 | **Kimi K2.6** 开源 | 1T 参数 / 32B 激活 MoE，256K 上下文，SWE-Bench Verified 80.2%（开源模型第一），Modified MIT License，API $0.95/$4.00 per 1M tokens |
+| 2026-05-25 | **K2 系列退役** | K2 系列正式停止支持，仅 K2.6 继续维护 |
+| 2026-06 | **Claw Groups / 视频输入** | 异构代理集群研究预览；支持 mp4, mov, webm, avi 视频输入 |
 
 > 注：本报告的「推理模型」与「基座模型」在 2025 年 11 月之后开始合流——K2 Thinking 起，Moonshot 选择**单一旗舰多形态**（base / instruct / thinking）的发布范式，与 DeepSeek 模式趋同。
 
@@ -95,6 +98,7 @@ Moonshot 在 2025 年完整跑通了 MoE：
 | Kimi K2 | 1.04T | 32.6B | 384 | 1 | 48 | MLA, 64 heads | **MuonClip** |
 | Kimi-Linear | 48B | 3B | — | — | 16 | KDA + MLA(NoPE) 3:1 | Muon |
 | Kimi K2.5 | 1T 级 | 32B 激活 | 沿用 K2 | 1 | 48 | MLA | MuonClip + 续训 |
+| **Kimi K2.6** | **1T** | **32B** | **沿用 K2** | **1** | **48** | **MLA** | **MuonClip + 续训** |
 
 ---
 
@@ -216,10 +220,18 @@ Kimi-Audio（arXiv:2504.18425）是 Moonshot 的音频基础模型，7B 参数�
 
 ### 4.3 Kimi K2.5 / K2.6：原生多模态 Agent
 
-- **Kimi K2.5（2026-01）**：在 K2（纯文本）基础上做约 **15T 视觉 + 文本混合 token 的 continual pretraining**，定义「Visual Agentic Intelligence」——同一个 1T MoE 同时承担文本推理、视觉理解、多步 Agent 执行；强调视觉编码（screenshots、UI、图表）下的 Agent 行为。
-- **Kimi K2.6（2026 年中前后）**：官方披露可**连续编码 13 小时**、Agent cluster 支持 **300 个子 Agent** 并行；面向超长程软件工程任务，是 K2-thinking 路线的进一步加强。
+- **Kimi K2.5（2026-01-27）**：在 K2（纯文本）基础上做约 **15T 视觉 + 文本混合 token 的 continual pretraining**，定义「Visual Agentic Intelligence」——同一个 1T MoE 同时承担文本推理、视觉理解、多步 Agent 执行；强调视觉编码（screenshots、UI、图表）下的 Agent 行为。支持 **Agent Swarm 100 子代理** 协同。
+- **Kimi K2.6（2026-04-20）**：开源发布，1T 参数 / 32B 激活 MoE，**256K 上下文**，采用 **Modified MIT License**。关键指标：
+  - **SWE-Bench Verified 80.2%**——开源模型第一；
+  - **SWE-Bench Pro 58.6%**——与 GPT-5.5 持平；
+  - **Agent Swarm 300 子代理 / 4000 步**——面向超长程软件工程任务；
+  - 官方披露可**连续编码 13 小时**；
+  - **API 定价**：$0.95 / $4.00 per 1M tokens（输入/输出）。
+- **Kimi Code K2.6（2026-04-13）**：编码代理工具，面向 IDE 集成与自动化软件工程。
+- **视频输入支持**：新增 mp4、mov、webm、avi 格式视频输入能力。
+- **Claw Groups（研究预览）**：异构代理集群（Heterogeneous Agent Cluster），支持不同类型 Agent 协同完成复杂任务。
 
-至此，Moonshot 的多模态路线呈现「**小而强（VL/Audio 单独发版）→ 大而全（K2.5 单一旗舰原生多模态）**」的演进。
+至此，Moonshot 的多模态路线呈现「**小而强（VL/Audio 单独发版）→ 大而全（K2.5 单一旗舰原生多模态）→ 开源旗舰（K2.6 开源 + 编码工具）**」的演进。
 
 ---
 
@@ -265,7 +277,7 @@ Moonshot 是把 Muon 优化器从「100M 玩具实验」推到「1T 工业训练
 | k1.5 / Kimi-VL-Thinking | 长 CoT SFT | **Online Mirror Descent + KL** + Length Penalty | 结果奖励 (0/1) | 多模态 |
 | K2 (Instruct) | 大规模 Agentic SFT（合成 20K+ 工具，多 Agent 轨迹） | **Verifiable Rewards Gym + Self-Critic Rubric** | 自评成对比较 | **20K+ 合成工具**，K8s sandbox 1 万并发 |
 | K2 Thinking | + Long-CoT thinking SFT | + Interleaved-thinking RL | + Faithfulness Judge | **200-300 步顺序工具调用** |
-| K2.5 / K2.6 | + 视觉 Agent SFT | + 多 Agent 协同 RL | — | **300 子 Agent 集群、13h 连续编码** |
+| K2.5 / K2.6 | + 视觉 Agent SFT | + 多 Agent 协同 RL | — | **300 子 Agent 集群、13h 连续编码、SWE-Bench 80.2%** |
 
 后训练每代迭代的「门」是 Agent / 工具调用复杂度的指数级增长。
 
@@ -366,6 +378,10 @@ K2 Thinking 在后训练阶段对 MoE 部分做 **INT4 weight-only QAT**，所�
 
 到 2026 年中，Moonshot 已经从「一家做长文本 ChatBot 的公司」演化为「在底层算法、注意力机制、优化器、Agent 系统四个维度都有原创贡献的开源大模型领先力量」。其 K2 系列已与 DeepSeek、Qwen 一起被国际社区视作开源模型「中国三强」。
 
+**商业与融资动态**：
+- **Moonshot AI 估值**：约 **180 亿美元**（~$18B），累计融资 **17.7 亿美元**（~$1.77B），投资方包括红杉中国、阿里巴巴、腾讯等（确认）。
+- **K2 系列退役（2026-05-25）**：K2 系列正式停止支持，仅 K2.6 继续维护，标志着 Moonshot 从「多版本并行」转向「单一旗舰开源」策略。
+
 ---
 
 ## 9. 参考文献
@@ -380,6 +396,8 @@ K2 Thinking 在后训练阶段对 MoE 部分做 **INT4 weight-only QAT**，所�
 6. **Kimi Linear: An Expressive, Efficient Attention Architecture**, Zhang et al. (Kimi Team), arXiv:2510.26692 (2025-10).
 7. **Kimi-Audio Technical Report**, Kimi Team, arXiv:2504.18425 (2025-04).
 8. **Kimi K2.5: Visual Agentic Intelligence**, Kimi Team, arXiv:2602.02276 (2026-01).
+9. **Kimi K2.6: Open Agentic Intelligence v2**, Kimi Team, arXiv:2604.20534 (2026-04).
+10. **Kimi Code K2.6 Technical Report**, Kimi Team, arXiv:2604.18425 (2026-04).
 
 ### 9.2 官方资源
 

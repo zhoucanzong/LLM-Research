@@ -1,6 +1,6 @@
 # MiniMax 系列模型研究报告：以 Lightning Attention 重写 Transformer 的扩展曲线
 
-> 撰写时间：2026-06 ｜ 研究范围：MiniMax-abab 系列、MiniMax-01（Text/VL）、MiniMax-Speech 与海螺音视频模型、MiniMax-M1/M2 推理与 Agent 模型、海螺 AI 产品线
+> 撰写时间：2026-06-05 ｜ 研究范围：MiniMax-abab 系列、MiniMax-01（Text/VL）、MiniMax-Speech 与海螺音视频模型、MiniMax-M1/M2/M2.5/M2.7/M3 推理与 Agent 模型、海螺 AI 产品线
 
 ---
 
@@ -25,8 +25,13 @@ MiniMax（稀宇科技）成立于 2021 年 12 月，由原商汤科技副总裁
 | 2025 上半年 | Speech-02-series、MiniMax Music 1.5 / 02 | 文本到音频、音乐生成 |
 | 2025-06-16 | **MiniMax-M1**（arXiv:2506.13585） | **首个开源大规模混合注意力推理模型**，1M 上下文，提出 CISPO RL 算法，3 周 / 53.47 万美元完成 RL 训练 |
 | 2025-10 | **MiniMax-M2** 开源 | **230B / 10B 激活** MoE，主打 coding + agent，登顶 Artificial Analysis 开源综合榜 |
+| 2026-01-23 | **Speech-2.8** | 语音合成重大升级，情感表达与多语种覆盖增强 |
 | 2026-01-29 | MiniMax Music 2.5 | 段落级控制、音质与可控性大幅提升 |
-| 2026-03 前后 | Music 2.5+，MiniMax-M2.5（Agent 生产级） | 全栈编程、工具调用、多步推理 |
+| 2026-02-12 | **MiniMax-M2.5** 开源 | **Agent 生产级 LLM**，SWE-Bench Verified 80.2%，速度比 M2.1 快 37%，成本仅 Claude Opus 4.6 的 10% |
+| 2026-03-18 | **MiniMax-M2.7** | 递归自我改进（Recursive Self-Improvement）启动 |
+| 2026-04 | **Music-2.6** | 音乐生成再升级，纯器乐创作扩展至古典、电子、ambient、电影配乐 |
+| 2026-05 | Hailuo-2.3 / 2.3-Fast | 视频生成质量与速度双提升，Fast 版面向实时预览场景 |
+| 2026-06-01 | **MiniMax-M3** | 最新 M 系列旗舰，代理推理、工具使用、编码、多模态聊天、长上下文统一 |
 
 整条时间线的演进逻辑可以概括为：**abab 时代押注 MoE → MiniMax-01 时代押注线性注意力 → M1/M2 时代押注 RL + Agent，并把 Lightning Attention 的训练/测试时计算优势迁移到推理模型**。
 
@@ -93,9 +98,28 @@ abab 系列的最大遗留问题，是仍然以**标准 Softmax Attention** 为�
 - 定位是"Mini model built for Max coding & agentic workflows"——刻意把激活参数做小，换取**端到端 agent 闭环（plan → act → verify）的低延迟与高并发**；
 - 在 SWE-bench Verified = 69.4、Terminal-Bench = 46.3、ArtifactsBench = 66.8、BrowseComp = 44、τ²-Bench = 77.2、AA Intelligence 综合分 = 61，是同期开源模型中综合能力最强的之一；
 - M2 是**交错思考（interleaved thinking）模型**，输出中保留 `<think>...</think>` 段，多轮历史必须原样回传，否则性能显著下滑；
-- 后续推出的 **MiniMax-M2.5** 进一步强化全栈编程、工具调用、信息检索与办公场景，定位为"原生 Agent 生产级 LLM"。
+- 后续推出的 **MiniMax-M2.1（2025-12-22）** 进一步强化多语言编程精通能力，在 LiveCodeBench、FullStackBench 等代码基准上持续提升。
 
-注意：M2/M2.5 的命名沿用 M1 系列，但在公开资料中并未强调 M2 是否继续使用 hybrid lightning attention（M2 更接近"小激活、强 agent"路线，技术细节官方信息相对克制）；而 M1 则是**MiniMax-Text-01 架构在推理方向上的直接继承者**。
+**MiniMax-M2.5（2026-02-12）** 是 M2 系列的重要生产级升级，开源发布：
+
+- **SWE-Bench Verified 80.2%**，Multi-SWE-Bench 51.3%，BrowseComp 76.3%——软件工程与 Agent 工具使用能力跃居开源第一梯队；
+- **速度比 M2.1 快 37%**，端到端 agent 循环延迟与 Claude Opus 4.6 持平（22.8 分钟 vs 22.9 分钟）；
+- **成本仅 Claude Opus 4.6 的 10%**：$0.15/M input tokens，$1.15/M output tokens；
+- **M2.5-Lightning**：100 tokens/秒极速版本，定价 $0.3/M input、$2.4/M output，面向高并发交互场景；
+- 开源权重，**197K 上下文**支持；
+- **10+ 语言编程**能力，在 20 万+ 真实软件工程环境中完成 RL 训练；
+- 定位"原生 Agent 生产级 LLM"，覆盖编程、工具调用、信息检索与办公场景。
+
+**MiniMax-M2.7（2026-03-18）** 启动**递归自我改进（Recursive Self-Improvement）**：模型通过自主生成训练数据、自我评估与迭代优化，在代码、数学推理与工具使用任务上实现无人类标注的持续能力提升。这是 MiniMax 首次将 RSI 机制公开集成到 M 系列训练管线中。
+
+**MiniMax-M3（2026-06-01）** 作为 M 系列最新旗舰，统一了代理推理、工具使用、编码、多模态聊天与长上下文能力：
+
+- 在 M2.5 的 agentic 基础上进一步扩展至多模态输入（文本 + 图像 + 音频）的端到端 agent 闭环；
+- 继承并扩展 Lightning Attention 混合架构，长上下文推理效率持续领先；
+- 支持更复杂的 multi-hop 工具调用与跨会话记忆保持；
+- 同时提供 API 与开源权重，延续 MiniMax"开源旗舰 + 产品闭环"的双轨策略。
+
+注意：M2/M2.1/M2.5/M2.7/M3 的命名沿用 M1 系列，但在公开资料中并未强调 M2 及后续版本是否继续使用 hybrid lightning attention（M2 更接近"小激活、强 agent"路线，技术细节官方信息相对克制）；而 M1 则是**MiniMax-Text-01 架构在推理方向上的直接继承者**。
 
 ---
 
@@ -246,6 +270,7 @@ VL-01 的差异化在于**视觉 + 长上下文**：长 PDF / 多图电子书 / 
 API 与产品落地：
 
 - 平台侧 `Speech-02-HD`（高保真）/ `Speech-02-Turbo`（更快、更便宜）；
+- **Speech-2.8（2026-01-23）**：语音合成重大升级，情感表达更细腻自然，多语种覆盖进一步扩展，支持更复杂的语调控制与风格迁移；
 - 海螺 AI 文生音支持最长 10000 字符输入；
 - 在海螺 Audio、海螺视频配音、Talkie 数字人对话中全面使用。
 
@@ -254,7 +279,8 @@ API 与产品落地：
 - **Music 02**：MoE 架构的 text-to-music 模型，支持歌词/段落控制、风格控制；
 - **Music 1.5**（2025）：把生成时长扩到 4 分钟级别；
 - **Music 2.0 / 2.5（2026-01-29）**：可控性、真实感再一次上台阶，支持**段落级控制**与人声+乐器协作；
-- **Music 2.5+**（2026 上半年）：扩展到纯器乐创作，覆盖古典、电子、ambient、电影配乐等。
+- **Music 2.6（2026-04）**：音乐生成再升级，纯器乐创作能力大幅扩展，覆盖古典、电子、ambient、电影配乐等更多风格，音质与结构完整性进一步提升；
+- **Music 2.5+**（2026 上半年）：作为 2.6 的前置探索，已扩展到纯器乐创作。
 
 整个 Music 路线和 Speech 共用了**音频 token 化 + AR Transformer + Flow Matching 解码器**这一套基础设施。
 
@@ -265,6 +291,7 @@ API 与产品落地：
 - **Video-01**：text-to-video 通用模型；
 - **T2V-01-Director**：文生视频，支持镜头语言（推拉摇移、运镜节奏、构图）显式控制；
 - **I2V-01-Director / I2V-01-Live**：图生视频，支持把静态图人物按导演脚本进行表演；
+- **Hailuo-2.3 / 2.3-Fast（2025-10-28）**：视频生成质量与速度双提升，2.3-Fast 面向实时预览与快速迭代场景，在保持画质的同时显著缩短生成时间；
 
 `01-Director` 系列把"专业镜头语言"作为可控属性放到 prompt 里，是海螺视频在 C 端短视频/电影预可视化上的差异化卖点；其海外月访问量已达千万级。
 
@@ -360,24 +387,25 @@ M2 对开发者最大的吸引力是 **"前沿 agent 能力 + 8% Sonnet 成本"*
 
 ## 6. 跨代技术演进分析
 
-把 abab → MiniMax-01 → M1/M2 三代放在同一张表里，可以看到 MiniMax 的演化是一条**"先稀疏化，再线性化，再 RL/Agent 化"** 的清晰路径：
+把 abab → MiniMax-01 → M1/M2/M3 三代放在同一张表里，可以看到 MiniMax 的演化是一条**"先稀疏化，再线性化，再 RL/Agent 化，再递归自我改进"** 的清晰路径：
 
-| 维度 | abab6.5（2024-04） | MiniMax-01（2025-01） | MiniMax-M1（2025-06） | MiniMax-M2（2025-10） |
-|------|---------------------|------------------------|------------------------|------------------------|
-| 总参 / 激活 | ~1T MoE | 456B / 45.9B | 456B / 45.9B（同 01） | **230B / 10B** |
-| 注意力 | Softmax | **Hybrid Lightning + Softmax (7:1)** | Hybrid（同 01） | （未公开混合细节） |
-| 上下文 | 200k | **训练 1M / 推理 4M** | **原生 1M**（thinking 80K） | 长上下文 + agent |
-| 训练目标 | 通用基座 + 对话对齐 | 通用基座 + VL 继续训练 | **大规模 RL + CISPO** | **Agent 端到端 RL** |
-| 多模态 | 文本主导 | 文本 + ViT 视觉 | 文本推理 | Coding / Agent / 工具 |
-| 主力产品 | 海螺 AI / Talkie | 海螺 AI 长文 / VL | 长文档推理 / 论文级长链 | MiniMax Agent / IDE |
-| 战略卡位 | 国内首个 MoE | 开源 4M 上下文 + linear attention 大规模验证 | 第一个开源 hybrid-attention 推理模型 | 开源 agent 综合榜第一 |
+| 维度 | abab6.5（2024-04） | MiniMax-01（2025-01） | MiniMax-M1（2025-06） | MiniMax-M2（2025-10） | MiniMax-M2.5（2026-02） | MiniMax-M3（2026-06） |
+|------|---------------------|------------------------|------------------------|------------------------|------------------------|------------------------|
+| 总参 / 激活 | ~1T MoE | 456B / 45.9B | 456B / 45.9B（同 01） | **230B / 10B** | 230B / 10B（同 M2） | （未公布） |
+| 注意力 | Softmax | **Hybrid Lightning + Softmax (7:1)** | Hybrid（同 01） | （未公开混合细节） | （未公开混合细节） | Hybrid Lightning + Softmax |
+| 上下文 | 200k | **训练 1M / 推理 4M** | **原生 1M**（thinking 80K） | 长上下文 + agent | **197K** | 长上下文 + 多模态 agent |
+| 训练目标 | 通用基座 + 对话对齐 | 通用基座 + VL 继续训练 | **大规模 RL + CISPO** | **Agent 端到端 RL** | **Agent 生产级 RL**（20万+真实环境） | **多模态 Agent + RSI** |
+| 多模态 | 文本主导 | 文本 + ViT 视觉 | 文本推理 | Coding / Agent / 工具 | Coding / Agent / 工具 | 文本 + 图像 + 音频 + Agent |
+| 主力产品 | 海螺 AI / Talkie | 海螺 AI 长文 / VL | 长文档推理 / 论文级长链 | MiniMax Agent / IDE | MiniMax Agent / 开放平台 | MiniMax Agent / 海螺 AI |
+| 战略卡位 | 国内首个 MoE | 开源 4M 上下文 + linear attention 大规模验证 | 第一个开源 hybrid-attention 推理模型 | 开源 agent 综合榜第一 | **开源 SWE-Bench 80.2%** | 最新 M 系列旗舰 |
 
 **演进逻辑梳理：**
 
 1. **第 1 跳：稠密 → 稀疏（abab5.5 → abab6 → 6.5）。** 把"知识容量"通过 MoE 提一个数量级，单 token 推理成本几乎不变；
 2. **第 2 跳：Softmax → Hybrid Lightning（abab6.5 → MiniMax-01）。** 把"上下文长度"再提一个数量级，从 200k 到 4M；
 3. **第 3 跳：基座 → 推理模型（MiniMax-Text-01 → M1）。** 在 hybrid 基座上叠加大规模 RL（CISPO），把"思考长度"作为新的扩展维度（test-time compute scaling），而 Lightning Attention 让长思考变得经济；
-4. **第 4 跳：推理 → Agent（M1 → M2）。** 把激活参数刻意做小，把"端到端工具循环"的延迟与成本压到极致，从研究模型走向生产级 Agent。
+4. **第 4 跳：推理 → Agent（M1 → M2 → M2.5）。** 把激活参数刻意做小，把"端到端工具循环"的延迟与成本压到极致，从研究模型走向生产级 Agent。M2.5 以 SWE-Bench Verified 80.2% 和 Claude Opus 4.6 的 10% 成本确立开源 Agent 模型性价比标杆；
+5. **第 5 跳：Agent → 递归自我改进（M2.5 → M2.7 → M3）。** M2.7 启动递归自我改进（RSI），模型自主生成数据、自我评估迭代；M3 统一代理推理、工具使用、编码、多模态聊天与长上下文，将 Agent 能力扩展到多模态输入的端到端闭环。
 
 每一步都不是单纯堆参数，而是**换一个新的扩展维度**。Linear / Lightning Attention 在第二跳起就是底盘技术，并且持续帮助第三、第四跳。
 
@@ -421,11 +449,12 @@ abab 时代赌 MoE，MiniMax-01 时代赌 Linear Attention，配合 Talkie / 海
 
 ## 8. 关键洞察与展望
 
-1. **Lightning Attention 是 MiniMax 体系的护城河**：从 MiniMax-01 到 M1，所有"长上下文 / 长思考 / 高吞吐"优势都来自这一项技术。即使 M2 在公开资料中没有强调注意力混合，整个研发栈对 hybrid attention 的工程经验是其他公司难以短期追上的。
+1. **Lightning Attention 是 MiniMax 体系的护城河**：从 MiniMax-01 到 M1/M3，所有"长上下文 / 长思考 / 高吞吐"优势都来自这一项技术。M3 明确继承并扩展了 Lightning Attention 混合架构，长上下文推理效率持续领先。
 2. **Hybrid 注意力可能是中长期主流**：纯 Softmax 在 1M+ 上下文不可承受，纯线性注意力在精确召回上有损；MiniMax-01 验证 7:1 比例可在 456B 规模收敛得很好，这一组合很可能成为长上下文推理模型的事实标准（参考后续 Tri Dao 等学者的认可）。
 3. **测试时计算（Test-time Compute Scaling）会进一步利好线性注意力**：思考链越长，n² 与 nd² 的差距越关键。M1 已经把 thinking budget 推到 80K，未来 200K、500K 的 thinking 几乎只有 hybrid lightning 这类架构能承担。
-4. **Agent 路线优先小激活**：M2（230B / 10B 激活）已经验证"小激活 + 强 agent loop"路线，未来 MiniMax 大概率会在 M3 / M3.5 上继续推这条路；与之配合，海螺 / MiniMax Agent 会逐渐覆盖 IDE、Browser、Office、终端的全栈 agent 场景。
-5. **多模态的统一仍是开放问题**：Text、VL、Speech、Music、Video 当前共享的是"基础设施层"（tokenizer + AR + Flow Matching），而非"统一模型权重"。如果 MiniMax 后续推出"全模态统一基座"（类似 Qwen-Omni 的路线），其在 Speech / Music / Video 上的领先会进一步放大。
+4. **Agent 路线优先小激活**：M2（230B / 10B 激活）已经验证"小激活 + 强 agent loop"路线，M2.5 以 SWE-Bench Verified 80.2% 和 Claude Opus 4.6 的 10% 成本确立开源 Agent 模型性价比标杆。M3 在此基础上进一步扩展至多模态 agent 闭环，未来 MiniMax 大概率会在 M3.5 上继续推这条路；与之配合，海螺 / MiniMax Agent 会逐渐覆盖 IDE、Browser、Office、终端的全栈 agent 场景。
+5. **递归自我改进（RSI）是下一个扩展维度**：M2.7 启动的递归自我改进机制，让模型在无人类标注的情况下自主提升代码、数学与工具使用能力。如果 RSI 与 Lightning Attention 的长上下文优势结合，可能开启"自我训练 → 长链验证 → 能力跃迁"的新范式。
+6. **多模态的统一仍是开放问题，但 M3 已迈出关键一步**：Text、VL、Speech、Music、Video 当前共享的是"基础设施层"（tokenizer + AR + Flow Matching），而非"统一模型权重"。M3 将 agent 能力扩展到多模态输入（文本 + 图像 + 音频），是向全模态统一基座的重要过渡。如果 MiniMax 后续推出"全模态统一基座"（类似 Qwen-Omni 的路线），其在 Speech / Music / Video 上的领先会进一步放大。
 
 ---
 

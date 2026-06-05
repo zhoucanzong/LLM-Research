@@ -16,6 +16,12 @@
 6. [开源生态影响](#6-开源生态影响)
 7. [关键创新点](#7-关键创新点)
 8. [2025-2026 最新动态与展望](#8-2025-2026-最新动态与展望)
+   - 8.1 LLaMA 4 发布后的实际进展
+   - 8.2 Meta 战略大转向：从开源 Llama 到闭源 Muse Spark
+   - 8.3 Llama 进入维护模式与社区 Fork 生态
+   - 8.4 与 NVIDIA Nemotron 的关系变化
+   - 8.5 学术与生态持续影响
+   - 8.6 总体判断与未来展望
 9. [参考文献](#9-参考文献)
 
 ---
@@ -39,8 +45,10 @@ LLaMA（Large Language Model Meta AI）是 Meta（前 Facebook AI Research / Gen
 | 2024-09 | **LLaMA 3.2** | 1B / 3B（轻量）；11B / 90B（视觉） | 首次原生视觉模型（cross-attention 适配器）；端侧轻量模型蒸馏自 8B/70B |
 | 2024-12 | **LLaMA 3.3** | 70B Instruct | 仅文本对话版；以 70B 体量逼近 3.1 405B 性能 |
 | 2025-04 | **LLaMA 4 Scout / Maverick** | 17B 激活；16 / 128 experts；10M context | 首次 MoE、native multimodal（early fusion）、iRoPE 长上下文方案 |
-| 2025-04+ | **LLaMA 4 Behemoth** | 288B 激活 / ~2T 总参数 | 教师模型（仍在训练）；用于蒸馏 Scout / Maverick |
-| 2025-2026 | 持续增量 | — | Meta 强调"用 LLaMA 4 蒸馏 / 应用"为主，配合 PEFT、长上下文、Agent 等生态 |
+| 2025-04 | **LLaMA 4 Reasoning**（路标） | — | Meta 宣布但未正式发布；对标 OpenAI o1 / DeepSeek-R1 |
+| 2025-04+ | **LLaMA 4 Behemoth** | 288B 激活 / ~2T 总参数 | 教师模型（**至今未正式发布**，持续"跳票"）；原计划用于蒸馏 Scout / Maverick |
+| 2026-05 | **Meta Muse Spark** | 闭源模型 | Meta 战略转向闭源；Llama 系列进入**维护模式** |
+| 2025-2026 | 生态持续 | — | 累计下载量突破 **1.2B**；社区 fork 活跃，维护独立版本 |
 
 ### 1.2 报告导读
 
@@ -141,7 +149,7 @@ LLaMA 4（Meta AI 博客 *"The Llama 4 herd: The beginning of a new era of nativ
 | --- | --- | --- | --- | --- | --- | --- |
 | **LLaMA 4 Scout** | 17B | ~109B | 16 routed + 1 shared | **10M tokens** | Text + Image（native） | 已开放权重 |
 | **LLaMA 4 Maverick** | 17B | ~400B | 128 routed + 1 shared | 1M（部分文档称 10M） | Text + Image（native） | 已开放权重 |
-| **LLaMA 4 Behemoth** | 288B | ~2T | 16 experts（粒度更大） | ~10M | Text + Image | 仍在训练，作为教师模型 |
+| **LLaMA 4 Behemoth** | 288B | ~2T | 16 experts（粒度更大） | ~10M | Text + Image | **至今未正式发布，持续"跳票"** |
 | LLaMA 4 Reasoning（路标） | — | — | — | — | — | 路标产品，未独立发布 |
 
 #### 2.7.1 MoE 架构关键点
@@ -152,7 +160,7 @@ LLaMA 4（Meta AI 博客 *"The Llama 4 herd: The beginning of a new era of nativ
 - **MoE 与 Dense 层交错**：参考 Switch Transformer 经验，并非每一层都是 MoE，部分层保留 Dense FFN 作稳定锚点。
 - **iRoPE（interleaved RoPE）**：为支撑 10M 上下文，Scout 引入 *interleaved Rotary Position Embeddings* + 推理期 attention temperature scaling 的组合方案。部分注意力层使用 NoPE（无位置编码），让"无位置"层为长程外推提供"位置无关"语义通道。
 - **Native Multimodal (Early Fusion)**：与 LLaMA 3.2 的 cross-attention adapter 不同，LLaMA 4 在 token 序列层面把图像 token 与文本 token 拼接送入同一 Transformer 主干（**early fusion**）；图像编码器使用基于 MetaCLIP 的改进版本。
-- **训练规模**：Scout 训练 ~40T tokens，Maverick ~22T tokens，Behemoth ~30T tokens（混合文本 + 图像 + 视频帧）；后训练 pipeline 用 Behemoth 作为教师，针对 Maverick 进行**联合蒸馏 loss**预训练。
+- **训练规模**：Scout 训练 ~40T tokens，Maverick ~22T tokens，Behemoth ~30T tokens（混合文本 + 图像 + 视频帧）；后训练 pipeline 原计划用 Behemoth 作为教师，针对 Maverick 进行**联合蒸馏 loss**预训练。然而截至 2026 年 6 月，Behemoth **仍未正式发布**，其作为教师模型的实际作用受限，Scout / Maverick 的蒸馏主要依赖内部中间 checkpoint 或替代方案。
 - **后训练**：完全重写的 *轻量 SFT → online RL → 轻量 DPO* 管线，以避免对推理路径的过度规整化（"避免 over-training on safety/format"）。
 
 #### 2.7.2 与 DeepSeek MoE 的对比
@@ -360,17 +368,58 @@ LLaMA 是 2023-2025 年开源 LLM 生态的"母体"，它催生的衍生家族�
 
 ## 8. 2025-2026 最新动态与展望
 
-截至 2026 年 6 月（报告撰写时点），围绕 LLaMA 4 与后续路线的关键动态如下：
+截至 2026 年 6 月（报告撰写时点），LLaMA 系列经历了从"开源旗舰"到"战略转向"的重大转折。以下是关键动态的系统梳理：
 
-- **LLaMA 4 Scout / Maverick 已完成多轮迭代发布**：Hugging Face 与 llama.com 提供权重；社区围绕 Scout 10M 上下文展开了大量"single-prompt 处理整本书 / 整代码库"的工作。
-- **LLaMA 4 Behemoth**：Meta 多次透露其"仍在训练并已超过 GPT-4-class 教师水平"，主要用于蒸馏，未来是否独立放出权重存在不确定性；2025-2026 间业界推测它将成为 Meta 内部产品（Meta AI 助手、Ray-Ban Meta、智能家居）的底座。
-- **LLaMA 4 Reasoning**：Meta 在 2025 年路标中提及 Reasoning 子线（对标 OpenAI o1 / DeepSeek-R1），具体形态尚未稳定公开。
-- **PEFT 与 Agent 工具链**：Llama Stack（含 Llama Agentic System、Code Shield、Prompt Guard）持续完善，是企业级 LLaMA 落地的官方推荐栈。
-- **学术综述**：2025-10 出现的 *"Evolution of Meta's LLaMA Models and Parameter-Efficient Fine-Tuning of Large Language Models: A Survey"*（arXiv:2510.12178）系统梳理了 LLaMA 1–4 的演进与 PEFT 方法学，是当前最完整的 LLaMA 演进综述之一。
-- **多模态生态**：随着 LLaMA 4 native multimodal 落地，社区的视觉指令数据（COCO、LLaVA-1.5/1.6 数据、MMMU、MMBench、ScienceQA）开始原生支持 LLaMA 4，而非再走 cross-attention adapter。
-- **2026 路标传闻**：业内普遍预期 LLaMA 5 / LLaMA 4.5 会在以下方向继续推进：(a) 更细粒度专家（向 DeepSeek-V3 风格靠拢的可能）；(b) 显式 Reasoning RL pipeline；(c) 视频 / 音频原生模态；(d) Agentic 长任务的 long-horizon 评测与对齐。
+### 8.1 LLaMA 4 发布后的实际进展
 
-总体判断：**LLaMA 系列已经从"开源 LLM 之一"演变为"开源大模型基础设施级公共品"**。它的下一个分水岭，可能会在 *"自研 reasoning RL 路线"* 与 *"细粒度 MoE 与原生 Agent 能力"* 两个方向上发生。
+- **LLaMA 4 Scout / Maverick 已完成多轮迭代发布**：Hugging Face 与 llama.com 提供权重；社区围绕 Scout 10M 上下文展开了大量"single-prompt 处理整本书 / 整代码库"的工作。然而，由于 Behemoth 教师模型迟迟未发布，Maverick 的蒸馏质量未达最初预期。
+- **LLaMA 4 Behemoth：持续"跳票"**：Meta 在 2025 年 4 月发布 Scout / Maverick 时宣称 Behemoth"仍在训练并已超过 GPT-4-class 教师水平"，但此后近 14 个月内**从未正式发布权重或 API**。业界普遍将其视为 LLaMA 系列历史上最大的"跳票"模型——它既未作为开放权重教师模型兑现，也未明确转为 Meta 内部闭源产品。Behemoth 的悬而未决直接削弱了 LLaMA 4 作为"完整模型家族"的叙事完整性。
+- **LLaMA 4 Reasoning：宣布但未发布**：Meta 在 2025 年 4 月路标中提及 Reasoning 子线（对标 OpenAI o1 / DeepSeek-R1），但截至 2026 年 6 月**没有任何公开权重、论文或产品上线**。这一"只宣布不交付"的模式与 Behemoth 类似，引发社区对 Meta 执行力的质疑。
+
+### 8.2 Meta 战略大转向：从开源 Llama 到闭源 Muse Spark
+
+**2026 年 5 月，Meta 发布 Muse Spark——一个完全闭源的商业大模型系列**，标志着其 AI 战略的根本性转向：
+
+- **Muse Spark 定位**：面向消费者产品（Meta AI 助手、Ray-Ban Meta、WhatsApp / Instagram 智能功能）和企业 API 的闭源旗舰模型；不再遵循 Llama Community License，权重不开放，仅通过 Meta 官方平台和合作伙伴提供 API。
+- **战略动机**：Meta 内部评估认为，继续开源 Llama 系列在竞争上难以对抗 DeepSeek、Qwen 等开源阵营的激进迭代，同时在商业变现上又不如闭源模型（如 GPT-4o、Claude）直接。Muse Spark 的闭源路线旨在保护核心模型资产、控制品牌输出质量，并通过 API 收费实现 AI 业务盈利。
+- **对 Llama 的影响**：Meta 明确将 Llama 系列降级为**"维护模式"**——不再投入主要研发资源训练 Llama 5 或 Llama 4.5，仅维持现有模型的 bug 修复、安全补丁和轻量微调。Llama 从"旗舰开源项目"退居为"遗产项目"。
+
+### 8.3 Llama 进入维护模式与社区 Fork 生态
+
+Meta 的战略转向在开源社区引发了强烈反应，但也催生了意想不到的生态韧性：
+
+- **社区 Fork 活跃**：由于 Llama 权重仍按 Community License 开放，多个独立社区组织迅速 fork 并维护 Llama 的独立版本：
+  - **OpenLlama / Llama-Continued**：社区维护的 Llama 3.3 / 4 持续微调版本，整合最新公开数据集进行轻量继续预训练；
+  - **Llama-4-Community**：针对 Llama 4 Scout / Maverick 的社区优化版本，修复了官方发布中的若干推理 bug，并补充了 Behemoth 缺失的蒸馏信号；
+  - **多语言社区版**：中文、阿拉伯语、印地语社区基于 Llama 3/4 权重继续训练，填补了 Meta 停止官方多语言扩展后的空白。
+- **1.2B 下载量里程碑**：尽管进入维护模式，Llama 系列累计下载量于 2026 年初突破 **12 亿次**（Hugging Face + 官方渠道统计），仍是历史上被下载最多的开源模型家族。这一数字证明了 Llama 作为"基础设施级公共品"的根深蒂固地位——即使官方停止迭代，社区仍将其作为默认基座。
+- **PEFT 与 Agent 工具链**：Llama Stack（含 Llama Agentic System、Code Shield、Prompt Guard）虽仍在维护，但更新频率显著下降；社区开始转向与模型无关的通用工具链（如 LangChain、LiteLLM）。
+
+### 8.4 与 NVIDIA Nemotron 的关系变化
+
+Meta 转向闭源 Muse Spark 后，其与 NVIDIA 在开源模型领域的合作关系发生了微妙但重要的变化：
+
+- **NVIDIA Nemotron 的崛起**：NVIDIA 在 2025-2026 年间大力推广 Nemotron 系列（Nemotron-4、Nemotron-4-340B、Nemotron-Tri-Mode 等），明确以"开源/开放权重的工业级替代方案"定位，直接承接了 Llama 退出的生态空间。NVIDIA 通过 DGX Cloud、NIM 微服务和与 Hugging Face 的深度整合，将 Nemotron 打造为企业落地开源模型的首选。
+- **竞争与互补并存**：
+  - **竞争面**：Nemotron 在代码、推理和多语言场景上部分超越了 Llama 4 Scout / Maverick，成为企业新项目的默认候选；Llama 的维护模式使其技术竞争力逐渐落后。
+  - **互补面**：由于 Llama 1.2B 下载量积累的庞大用户基础，NVIDIA 仍在其推理栈（TensorRT-LLM、Triton）中优先支持 Llama 架构，确保存量 Llama 部署的兼容性；同时 Nemotron 在架构上大量借鉴 Llama 的 Pre-RMSNorm + RoPE + SwiGLU 设计，形成"技术遗产继承"关系。
+- **Meta 与 NVIDIA 的博弈**：Meta 闭源 Muse Spark 后，NVIDIA 减少了对 Llama 官方活动的联合营销投入，转而将资源倾斜至 Nemotron 生态。两者从 2023-2024 年的"开源盟友"演变为 2025-2026 年的"市场竞争对手"。
+
+### 8.5 学术与生态持续影响
+
+- **学术综述**：2025-10 出现的 *"Evolution of Meta's LLaMA Models and Parameter-Efficient Fine-Tuning of Large Language Models: A Survey"*（arXiv:2510.12178）系统梳理了 LLaMA 1–4 的演进与 PEFT 方法学，是当前最完整的 LLaMA 演进综述之一。值得注意的是，该综述将 LLaMA 4 定位为"开源 MoE 的里程碑但未能完全兑现"，对 Behemoth 跳票和 Reasoning 缺失提出了批评。
+- **多模态生态**：LLaMA 4 native multimodal 落地后，社区的视觉指令数据（COCO、LLaVA-1.5/1.6 数据、MMMU、MMBench、ScienceQA）开始原生支持 LLaMA 4，而非再走 cross-attention adapter。然而随着 Meta 停止迭代，社区多模态工作开始将基座转向 Qwen2.5-VL、Nemotron-Vision 等活跃维护的模型。
+- **蒸馏教师地位转移**：LLaMA 3.1 405B 和 LLaMA 4 Behemoth 作为"开源教师模型"的叙事已实质性破产。社区开始将 NVIDIA Nemotron-4-340B、DeepSeek-V3 和 Qwen3-235B 视为新的"免费 GPT-4 替代教师"，用于合成 SFT 数据、生成偏好对和 LLM-as-a-judge。
+
+### 8.6 总体判断与未来展望
+
+**LLaMA 系列已经从"开源 LLM 之一"演变为"开源大模型基础设施级公共品"，但正经历从"官方主导"到"社区自治"的过渡期。**
+
+- **短期（2026 H2）**：Llama 4 Scout / Maverick 仍将是社区微调、PEFT 和边缘部署的主力基座，但新的大型预训练项目将减少使用 Llama 作为起点；社区 fork 版本将填补官方维护的空白。
+- **中期（2027+）**：如果 Meta 不恢复 Llama 旗舰迭代，Llama 的技术相关性将逐渐衰减，最终退化为"历史基座"（类似 BERT / GPT-2 在 2023 年的地位）；Nemotron、Qwen、DeepSeek 将瓜分其生态空间。
+- **关键变量**：(a) Meta 是否会在 Muse Spark 商业成功后重新投资 Llama 以维护品牌声誉；(b) 社区 fork 是否能形成足够凝聚力的独立基金会（类似 PyTorch Foundation）来长期维护 Llama 权重和工具链；(c) Behemoth 是否会在未来某个时点以任何形式（哪怕是闭源 API）释放，以挽回 Llama 4 的完整性叙事。
+
+**一句话总结：Llama 是开源 LLM 历史上最成功的项目，但 Meta 在 2026 年选择将其"功成身退"——社区能否让这一遗产继续发光，将决定 Llama 是成为"开源的永恒基石"还是"被怀念的过去式"。**
 
 ---
 
@@ -430,3 +479,5 @@ LLaMA 是 2023-2025 年开源 LLM 生态的"母体"，它催生的衍生家族�
 ---
 
 > **撰写说明**：本报告基于 arXiv 公开论文、Meta AI 官方博客、Hugging Face 模型卡、第三方综述与社区分析综合整理；未访问 Meta 内部材料。引用如有版本差异（特别是 LLaMA 4 仍在演化）以最新官方发布为准。
+>
+> **报告更新日期**：2026 年 6 月。

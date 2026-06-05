@@ -20,6 +20,8 @@
 3. **MiMo V2 时代（2025.12 至今）**：从稠密 7B 跃迁到大规模 MoE，进入「Agent 时代」战略：
    - MiMo-V2-Flash（309B 总参 / 15B 激活 MoE，2025.12 开源）
    - MiMo-V2-Pro / Omni / TTS（万亿级 MoE 三件套，2026.03.19 发布）
+   - **MiMo-V2.5 系列（2026.04.23）**：全面升级，含 V2.5-Pro、V2.5、V2.5-TTS、V2.5-ASR
+   - **V2-Pro / V2-Omni 退役（2026.06.30）**：旧版停止服务，迁移至 V2.5 系列
 
 ### 1.2 战略坐标：「人车家全生态」与 Agent 化
 
@@ -366,23 +368,25 @@ MiMo-7B-RL 的根本不同在于**「自训练」而非「蒸馏」**：
 
 ## 八、向 MoE / Agent 的跃迁：MiMo-V2 系列
 
-### 8.1 MiMo-V2-Flash（2025.12.17 开源）
+### 8.1 MiMo-V2-Flash（2025.12.16 开源）
 
 **关键参数**（确认）：
 - **309B 总参 / 15B 激活**（MoE 稀疏比 ~5%）
-- **混合滑动窗口注意力（Hybrid SWA + Sink Bias）**
-- **多层 MTP** 推理加速
+- **混合滑动窗口注意力（Hybrid SWA + Sink Bias）**，采用 **1:5 Global Attention : SWA** 比例
+- **3 层 MTP** 推理加速
 - 主打「极高推理效率 + Agent 工作流」
+
+**2026-02-04 更新**：Thinking Mode 下 SWE-Bench 达到 **78.6%**，工具调用准确率提升至 **97%**。
 
 代码能力据小米官方对标 Claude Sonnet 系列闭源模型；以激进稀疏度兑现「以 15B 激活打平甚至超过 671B 稠密 / 大稀疏」的成本曲线（确认源：小米合作伙伴大会、ModelScope 官方页）。
 
-### 8.2 MiMo-V2-Pro / Omni / TTS（2026.03.19）
+### 8.2 MiMo-V2-Pro / Omni / TTS（2026.03.18 发布）
 
 | 模型 | 总参 / 激活 | 上下文 | 主打 |
 |---|---|---|---|
 | **MiMo-V2-Pro**（旗舰文本 / Agent） | ~1T / 42B（MoE，混合注意力架构） | **1M tokens 原生** | Claw-Eval 75.7（全球前三）、AA Intelligence Index 49（中国第二、全球第八） |
-| **MiMo-V2-Omni**（全模态基座） | 未公开（推测同量级 MoE） | 262K | BigBench Audio 94.0、MMAU-Pro 69.4、FutureOmni 66.7 |
-| **MiMo-V2-TTS**（端到端语音合成） | 自研 Audio Tokenizer + 多码本联合建模 | — | 句中情感切换、精准歌唱音高、四川/河南/粤/台湾方言 |
+| **MiMo-V2-Omni**（全模态基座） | 未公开（推测同量级 MoE） | **256K** | BigBench Audio 94.0、MMAU-Pro 69.4、FutureOmni 66.7 |
+| **MiMo-V2-TTS**（端到端语音合成） | 自研 Audio Tokenizer + 多码本联合建模 | — | 1 亿小时数据训练，句中情感切换、精准歌唱音高、四川/河南/粤/台湾方言 |
 
 发布前两款模型以「Hunter Alpha」「Healer Alpha」代号匿名上线 OpenRouter，调用量多日登顶日榜，累计调用量突破 1 万亿 tokens。
 
@@ -393,7 +397,27 @@ MiMo-7B-RL 的根本不同在于**「自训练」而非「蒸馏」**：
 
 **资本承诺**：雷军在发布会上宣布 2026 年 AI 研发与资本预算超 160 亿元，未来 3 年至少 600 亿元（确认）。
 
-### 8.3 系列演进逻辑
+### 8.3 MiMo-V2.5 系列（2026.04.23 全面升级）
+
+MiMo-V2.5 系列是 V2 的全面升级，覆盖旗舰文本、全模态、语音合成与语音识别：
+
+| 模型 | 总参 / 激活 | 上下文 | 核心能力 |
+|---|---|---|---|
+| **MiMo-V2.5-Pro** | **1T / 42B**（MoE） | **1M tokens** | 高强度代理场景可比 **Claude Opus 4.6** |
+| **MiMo-V2.5** | 未公开（推测同量级 MoE） | **1M tokens** | **原生全模态感知**——图像 / 视频 / 音频 / 文本，代理能力日常任务可比 V2.5-Pro |
+| **MiMo-V2.5-TTS** | 自研 Audio Tokenizer | — | 高质量语音合成，**风格控制 / 音色克隆** |
+| **MiMo-V2.5-ASR**（2026.06.02） | 自研 Audio Tokenizer | — | **双语 + 方言**识别，**歌词转录**，复杂音频场景 |
+
+**关键升级点**：
+- V2.5-Pro 与 V2.5 均支持 **1M 上下文**，V2.5 强调「原生全模态感知」——同一模型内端到端处理图像、视频、音频、文本；
+- V2.5-TTS 新增风格控制与音色克隆能力，超越 V2-TTS 的基础情感切换；
+- V2.5-ASR 支持双语与多方言（含四川、河南、粤语、台湾方言），在歌词转录与复杂音频场景下表现突出。
+
+### 8.4 V2-Pro / V2-Omni 退役（2026.06.30）
+
+小米官方宣布 **MiMo-V2-Pro 与 MiMo-V2-Omni 将于 2026 年 6 月 30 日正式停止服务**，用户需迁移至 V2.5 系列。V2-Flash 与 V2-TTS 继续维护。此举标志着小米从「V2 多版本并行」转向「V2.5 统一旗舰」策略。
+
+### 8.5 系列演进逻辑
 
 ```mermaid
 graph LR
@@ -404,12 +428,16 @@ graph LR
     F[MiMo-V2-Flash 309B/15B MoE] --> G[MiMo-V2-Pro 1T/42B 1M]
     F --> H[MiMo-V2-Omni 全模态]
     F --> I[MiMo-V2-TTS]
+    G --> J[MiMo-V2.5-Pro 1T/42B 1M]
+    H --> K[MiMo-V2.5 全模态 1M]
+    I --> L[MiMo-V2.5-TTS]
+    E --> M[MiMo-V2.5-ASR]
     B -.推理范式继承.-> F
 ```
 
 可以观察到两条主线：
 1. **稠密 7B 主线**（2025）：以 MiMo-7B 为底座，向 VL / Audio / Embodied 横向扩展，每条线复用 base 模型 + 阶段化课程 + GRPO 变体。
-2. **稀疏 MoE 主线**（2025.12 起）：从 309B/15B Flash 起步，9 个月内跃迁到 ~1T/42B Pro，MoE + 1M 长上下文 + 混合注意力 + MTP 成为标配。
+2. **稀疏 MoE 主线**（2025.12 起）：从 309B/15B Flash 起步，9 个月内跃迁到 ~1T/42B Pro，再于 2026.04 全面升级至 V2.5 系列；MoE + 1M 长上下文 + 混合注意力 + MTP 成为标配。V2.5 系列进一步统一全模态感知与语音能力。
 
 ---
 
@@ -447,9 +475,9 @@ MiMo 系列只用了不到一年时间，就从「内部 MiLM」走到了「业�
 
 1. **「为推理而预训练」的范式确认**：MiMo-7B 用 25T 推理优先 tokens + 三阶段课程 + MTP，证明 7B 模型在 RL 后能直接对标 32B 推理模型乃至闭源 o1-mini，同时给社区贡献了 Base / SFT / RL-Zero / RL 全套 checkpoint。
 2. **GRPO 变体 + IOI 风格密集奖励 + Seamless Rollout Engine** 形成可复现、可工业化的 RL 训练栈，被 MiMo-VL、MiMo-Embodied、MiMo-V2 全线复用。
-3. **从 7B 稠密到 1T MoE 的跃迁**：以 MiMo-V2-Flash（309B/15B）打通 MoE 工程链路，再以 MiMo-V2-Pro（1T/42B + 1M context）切入 Agent 时代；MiMo-VL → MiMo-Embodied 完成多模态与具身/智驾打通；MiMo-Audio / TTS 完成语音入口。三条线最终回到小米「人车家全生态」的战略坐标系。
+3. **从 7B 稠密到 1T MoE 的跃迁**：以 MiMo-V2-Flash（309B/15B）打通 MoE 工程链路，再以 MiMo-V2-Pro（1T/42B + 1M context）切入 Agent 时代；**V2.5 系列（2026.04）全面升级**，Pro 对标 Claude Opus 4.6，标准版实现原生全模态感知，TTS/ASR 覆盖语音全链路；MiMo-VL → MiMo-Embodied 完成多模态与具身/智驾打通；MiMo-Audio / TTS / ASR 完成语音入口。三条线最终回到小米「人车家全生态」的战略坐标系。
 
-对于研究者，MiMo-7B 是目前研究「base model reasoning potential 与 RL 上限关系」的最佳开源样本；对于工程团队，MiMo-V2-Flash 与 Pro 提供了以国产开源 MoE + 1M 上下文构建低成本 Agent 系统的现实选择。
+对于研究者，MiMo-7B 是目前研究「base model reasoning potential 与 RL 上限关系」的最佳开源样本；对于工程团队，MiMo-V2-Flash 与 Pro 提供了以国产开源 MoE + 1M 上下文构建低成本 Agent 系统的现实选择；**V2.5 系列则进一步将全模态感知与高强度 Agent 能力推向开源前沿**。
 
 ---
 

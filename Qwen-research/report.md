@@ -1,6 +1,6 @@
 # Qwen系列模型深度调研报告
 
-> 调研日期：2025年6月（2026年6月更新）  
+> 调研日期：2026年6月5日  
 > 覆盖范围：Qwen系列从初代（2023年8月）到Qwen3.7-Plus（2026年6月）的完整技术演进  
 > 写作原则：以**演进路径**为骨架，每个方向作为一条连续时间线，2026年新进展融入对应章节，而非独立罗列
 
@@ -56,9 +56,14 @@ Qwen（通义千问）是阿里巴巴云推出的全栈大模型系列，自2023
 ├── 02月  Qwen3.5 (397B-A17B)    256专家MoE + 201语言 + 262K原生上下文 + 19x吞吐
 ├── 02月  Qwen3.5-Plus            托管API版本
 ├── 02月  Qwen3-VL-Flash          轻量级视觉理解上线百炼
-├── 04月  Qwen3.5-Omni            全模态升级（arXiv:2604.15804），215基准SOTA
-├── 05月  Qwen3.6 系列            27B/72B Dense + 35B-A3B MoE + Plus/Flash/Max-Preview
-├── 05月  Qwen3.7-Max             闭源旗舰Agent模型（1M上下文，35小时自主执行）
+├── 03月  Qwen3.5-Omni            全模态升级（arXiv:2604.15804），215基准SOTA
+├── 03月  Qwen3.6-Plus            免费预览版上线OpenRouter，1M上下文，更强推理和Agent行为
+├── 04月  Qwen3.6 系列            27B/72B Dense + 35B-A3B MoE + Plus/Flash/Max-Preview
+├── 04月  Qwen3.7-Max             闭源旗舰Agent模型（1M上下文，35小时自主执行）
+├── 04月  Qwen-Image (20B MMDiT)  图像生成模型发布
+├── 04月  Qwen-Image-Edit         图像编辑模型发布
+├── 04月  Qwen3Guard              安全护栏模型发布
+├── 04月  Qwen-MT                 92语言翻译模型发布
 ├── 05月  Qwen3.5-LiveTranslate   实时同声传译（60语言，2.8秒延迟，声音克隆）
 ├── 05月  Qwen3-Coder-Next        本地编码Agent（80B-A3B混合注意力）
 └── 06月  Qwen3.7-Plus            多模态Agent基座（Vision Arena全球前五）
@@ -162,18 +167,19 @@ Qwen（通义千问）是阿里巴巴云推出的全栈大模型系列，自2023
 
 预训练分三阶段：S1通用30T+ tokens / S2推理~5T tokens / S3长上下文（4K→32K）。
 
-#### Qwen3-Next-80B-A3B（2025.09）— 混合注意力新架构
+#### Qwen3-Next-80B-A3B（2025.09.11）— 超稀疏MoE混合注意力新架构
 
 这是从Qwen3到Qwen3.5/3.6/3.7的**架构跨越点**，引入了三项关键变革：
 
 - **Hybrid Attention**：用 **Gated DeltaNet（线性注意力变体）+ Gated Attention** 替代标准全注意力。Gated DeltaNet在长序列推理下开销大幅低于Full Attention，与Gated Attention混合后兼顾表达能力与效率
 - **Native MTP（Multi-Token Prediction）**：在原生预训练中内置多token预测目标
 - **更高稀疏度MoE**：80B总参数仅3B激活（激活比1/27，远超Qwen3的1/10）
+- **超稀疏MoE**：80B总参数/3B激活的极端稀疏比，验证Hybrid Attention在超高稀疏度下的训练稳定性
 - 开源Apache 2.0，可本地部署
 
 Qwen3-Next虽然规模仅80B，但其架构成为**后续所有Qwen3.5/3.6/3.7的技术底座**。
 
-#### Qwen3.5（2026.02）— MoE效率革命
+#### Qwen3.5（2026.02.16）— MoE效率革命
 
 2026年2月16日（农历除夕）发布的首个重大版本升级。架构延续Qwen3-Next的Hybrid Attention，但MoE规模与上下文实现新突破：
 
@@ -181,27 +187,53 @@ Qwen3-Next虽然规模仅80B，但其架构成为**后续所有Qwen3.5/3.6/3.7�
 - **262K原生上下文**：相比Qwen3的128K再翻一倍
 - **201种语言/方言**：相比Qwen3的119种大幅扩展（约+70%）
 - **吞吐量飞跃**：32K上下文下比Qwen3-Max快**8.6倍**，256K下快**19倍**
+- **统一视觉-语言基础**：Qwen3.5-VL采用与LLM统一的Hybrid Attention基座，视觉理解能力与文本推理能力同步提升
+- **门控Delta网络+稀疏MoE混合架构**：Gated DeltaNet（线性注意力变体）与Gated Attention混合，兼顾超长序列效率与表达能力
+- **百万代理环境RL训练**：在百万级模拟Agent环境中进行强化学习训练，提升工具使用与多步推理能力
 - **Apache 2.0完全开源**
 - 战略定位"Towards Native Multimodal Agents"
 
+Qwen3.5系列提供完整模型矩阵：
+
+| 模型 | 规模 | 定位 |
+|------|------|------|
+| Qwen3.5-397B-A17B | 397B总/17B激活 | 旗舰MoE |
+| Qwen3.5-122B-A10B | 122B总/10B激活 | 大型MoE |
+| Qwen3.5-35B-A3B | 35B总/3B激活 | 中型MoE |
+| Qwen3.5-27B | 27B密集 | 中型Dense |
+| Qwen3.5-9B | 9B密集 | 轻量Dense |
+| Qwen3.5-4B | 4B密集 | 边缘部署 |
+| Qwen3.5-2B | 2B密集 | 移动端 |
+| Qwen3.5-0.8B | 0.8B密集 | 极轻量 |
+
 Qwen3.5还推出了Qwen3.5-9B等小尺寸变体，在多个基准上击败更大规模的模型。
 
-#### Qwen3.6 系列（2026.05）— 开源新基线
+#### Qwen3.6 系列（2026.04.22）— 开源新基线
 
 在Qwen3.5基础上继续迭代，提供完整的开源模型矩阵：
 
 | 模型 | 类型 | 关键参数 |
 |------|------|----------|
-| Qwen3.6-27B | Dense | 单A100可部署，工作马模型 |
+| Qwen3.6-27B | Dense | 27B密集模型，单A100可部署，工作马模型 |
 | Qwen3.6-72B | Dense | MMLU 88.5% / HumanEval 92.1% |
-| Qwen3.6-35B-A3B | MoE | 3B激活，128K上下文（YaRN），R1-Zero RLHF对齐 |
+| Qwen3.6-35B-A3B | MoE | **35B总参数/3B激活**，128K上下文（YaRN），R1-Zero RLHF对齐 |
 | Qwen3.6-Plus | API | 生产级托管版本 |
 | Qwen3.6-Flash | API | 低延迟优化 |
 | Qwen3.6-Max-Preview | API | 实验性前沿能力 |
 
-工程优化：**AITemplate内核融合**，推理吞吐相比Qwen2.5提升2倍；R1-Zero风格RLHF对齐替代传统SFT+DPO。
+Qwen3.6 的核心升级：
 
-#### Qwen3.7-Max（2026.05.19）— Agent Frontier旗舰
+- **更强的Agentic Coding**：在SWE-Bench、Multi-SWE-Bench等软件工程基准上相比Qwen3.5进一步提升，支持更复杂的多文件编辑与仓库级理解；
+- **Thinking Preservation**：跨对话保留思考上下文，模型在多轮交互中能够维持连贯的推理链条，避免"每轮重置"导致的性能损失；
+- **工程优化**：**AITemplate内核融合**，推理吞吐相比Qwen2.5提升2倍；R1-Zero风格RLHF对齐替代传统SFT+DPO。
+
+**Qwen3.6-Plus（2026.03.31）** 免费预览版上线OpenRouter：
+
+- **1M tokens上下文**，支持超长文档理解与长程任务执行；
+- 更强推理和Agent行为，在复杂多步工具调用场景中表现突出；
+- 通过OpenRouter平台向全球开发者免费开放预览，扩大Qwen生态覆盖。
+
+#### Qwen3.7-Max（2026.04）— Agent Frontier旗舰
 
 闭源旗舰，专为长程自主Agent设计：
 
@@ -209,6 +241,7 @@ Qwen3.5还推出了Qwen3.5-9B等小尺寸变体，在多个基准上击败更大
 - **35小时连续自主运行**记录：在86小时RL训练中自主标记1,618个奖励黑客（reward hacking）案例
 - **跨框架泛化**：在Claude Code / OpenClaw / Qwen Code等不同Agent框架中通用
 - **API兼容**：同时支持OpenAI spec和Anthropic spec
+- **Agentic Coding、复杂推理、长程任务**：在SWE-Bench Verified、Terminal Bench、LiveCodeBench等编码与Agent基准上达到或超越Claude Opus 4.6
 - 持续优化案例：432次kernel评估、1,158次工具调用
 
 关键基准（vs Claude Opus 4.6）：
@@ -440,12 +473,16 @@ Omni方向是Qwen过去三年最具突破性的一条线：从单模态音频理
 
 在Qwen2.5-Omni的Thinker-Talker架构基础上进行五大关键升级，成为**首个在文本、图像、音频、视频上同时保持SOTA**的单一模型。
 
-#### Qwen3.5-Omni（2026.04）— 全模态升级
+#### Qwen3.5-Omni（2026.03.31）— 全模态升级
 
-技术报告arXiv:2604.15804。三大新能力：
+技术报告arXiv:2604.15804。基于Qwen3.5 Hybrid Attention基座，实现全模态统一：
 
+- **256K上下文**：支持超长多模态序列理解，文本、图像、音频、视频统一处理
+- **113种语言**：覆盖全球主要语系，多语种全模态能力
+- **10小时音频/1小时视频**：超长音视频理解能力，支持完整会议记录、电影分析等场景
 - **可控的音视频字幕生成**：精细控制字幕风格与内容
 - **百亿级参数规模**，音频-视觉理解和生成均达SOTA
+- 旗舰版Qwen3.5-Omni-Plus在**215个音频/音视频基准中达到SOTA，超越Gemini 3.1 Pro**
 - 旗舰版Qwen3.5-Omni-Plus在**215个音频/音视频基准中达到SOTA，超越Gemini 3.1 Pro**
 - 视觉编码器采用Qwen3.5的统一编码器处理图像和视频
 
@@ -536,6 +573,35 @@ Qwen3-Next架构（Hybrid Attention + Native MTP）
 ```
 
 每次基座升级，所有下游方向均获得"免费"的能力提升。Qwen3的Strong-to-Weak蒸馏与Qwen3-Next的Hybrid Attention成为**两次最重要的"普惠技术注入"**——前者使小模型训练效率提升10倍，后者使所有后续方向获得超长上下文能力。
+
+### 5.4 图像生成与编辑：Qwen-Image & Qwen-Image-Edit
+
+Qwen系列在2026年4月扩展至图像生成与编辑领域，采用20B参数的MMDiT（Multimodal Diffusion Transformer）架构：
+
+**Qwen-Image（2026.04）**：
+- **20B MMDiT架构**：基于Diffusion Transformer的文本到图像生成模型
+- **高质量图像生成**：支持多种风格、分辨率和宽高比
+- **与Qwen3.5/3.6基座对齐**：利用Qwen语言模型的语义理解能力，实现更精准的文本-图像对齐
+- **开源Apache 2.0**：与Qwen系列其他模型一致的开放许可
+
+**Qwen-Image-Edit（2026.04）**：
+- **指令式图像编辑**：支持自然语言指令驱动的图像修改（inpainting、outpainting、风格迁移、对象替换等）
+- **保持图像一致性**：在编辑过程中保持原图风格、光照和结构的一致性
+- **多轮编辑支持**：支持连续多轮编辑指令，逐步精细化图像
+
+### 5.5 安全与翻译：Qwen3Guard & Qwen-MT
+
+**Qwen3Guard（2026.04）**：
+- **安全护栏模型**：专为内容安全设计的专用模型，用于检测和过滤有害内容
+- **多维度风险评估**：覆盖暴力、仇恨、歧视、色情、欺诈等多类风险
+- **与Qwen3.5/3.6基座协同**：作为独立安全层，可灵活部署于Qwen系列模型的输入/输出管线
+- **开源Apache 2.0**：透明可审计的安全机制
+
+**Qwen-MT（2026.04）**：
+- **92语言翻译模型**：覆盖全球主要语系，支持92种语言之间的双向翻译
+- **专业领域优化**：在法律、医学、技术、文学等专业领域进行针对性优化
+- **长文本翻译**：支持超长文档的连贯翻译，保持跨段落一致性
+- **与Qwen3.5的201种语言基础协同**：利用Qwen3.5的多语言基座能力，实现高质量低资源语言翻译
 
 ---
 
@@ -656,6 +722,8 @@ LLM基座升级自动带动所有模态能力提升。
 - **架构层面**：Hybrid Attention（Gated DeltaNet）替代Full Attention，超长上下文高效推理
 - **能力层面**：从对话式AI转向长程自主Agent（Qwen3.7-Max的35小时持续运行）
 - **多模态层面**：视觉+语言+音频+工具统一为一体化Agent基座（Qwen3.7-Plus的"看、想、写、做、验"闭环）
+- **生成层面**：Qwen-Image/Qwen-Image-Edit将图像生成与编辑纳入Qwen生态，实现"理解+生成"全链路覆盖
+- **安全层面**：Qwen3Guard提供独立可审计的安全护栏，保障大规模部署的内容安全
 - **生态层面**：开源（Apache 2.0）+ 闭源API双轨并行，覆盖从本地部署（Coder-Next 3B激活）到云端旗舰（Qwen3.7-Max 1M上下文）
 
 ---
@@ -724,7 +792,19 @@ LLM基座升级自动带动所有模态能力提升。
 
 **影响**：定义了"Agent Frontier"的新基准；将LLM能力衡量从单步对话延伸至长程任务执行。
 
-### 7.11 BBPE 151K大词表（Qwen初代, 2023.08）— ★★★
+### 7.11 Thinking Preservation（Qwen3.6, 2026.04）— ★★★★
+
+**技术意义**：跨对话保留思考上下文，模型在多轮交互中维持连贯的推理链条，避免"每轮重置"导致的性能损失。这是从"单轮推理"到"持续认知"的关键转变。
+
+**影响**：使Agent能够在长程任务中保持上下文连贯性，为Qwen3.7-Max的35小时自主运行提供认知基础；成为后续Agent模型的标准能力。
+
+### 7.12 MMDiT图像生成架构（Qwen-Image, 2026.04）— ★★★★
+
+**技术意义**：20B参数的Multimodal Diffusion Transformer，将Qwen语言模型的语义理解能力与Diffusion生成能力结合，实现高质量的文本到图像生成与指令式编辑。
+
+**影响**：将Qwen生态从"理解+推理"扩展至"理解+生成"全链路；Qwen-Image-Edit支持多轮自然语言指令驱动编辑，为视觉Agent提供生成工具。
+
+### 7.13 BBPE 151K大词表（Qwen初代, 2023.08）— ★★★
 
 **技术意义**：151,936词表（相比LLaMA 32K词表），中文编码效率提升3-4倍。
 
@@ -763,7 +843,8 @@ LLM基座升级自动带动所有模态能力提升。
 | 5 | Qwen3 Technical Report | arXiv:2505.09388 | 2025.05 |
 | 6 | Qwen3-Next Blog | qwen.ai (2025.09) | 2025.09 |
 | 7 | Qwen3.5 Blog | qwen.ai/blog?id=qwen3.5 | 2026.02 |
-| 8 | Qwen3.7 The Agent Frontier | qwen.ai/blog?id=qwen3.7 | 2026.05 |
+| 8 | Qwen3.6 Blog | qwen.ai/blog?id=qwen3.6 | 2026.04 |
+| 9 | Qwen3.7 The Agent Frontier | qwen.ai/blog?id=qwen3.7 | 2026.05 |
 
 ### 8.2 视觉语言模型
 
@@ -795,12 +876,16 @@ LLM基座升级自动带动所有模态能力提升。
 | 22 | QwQ-32B: Embracing the Power of Reinforcement Learning | Qwen Blog | 2025.03 |
 | 23 | Qwen3-Coder 480B-A35B Blog | qwen.ai | 2025.07 |
 | 24 | Qwen3-Coder-Next Blog | qwen.ai/blog?id=qwen3-coder-next | 2026.05 |
+| 25 | Qwen-Image Technical Report | qwen.ai/blog?id=qwen-image | 2026.04 |
+| 26 | Qwen-Image-Edit Blog | qwen.ai/blog?id=qwen-image-edit | 2026.04 |
+| 27 | Qwen3Guard Blog | qwen.ai/blog?id=qwen3guard | 2026.04 |
+| 28 | Qwen-MT Blog | qwen.ai/blog?id=qwen-mt | 2026.04 |
 
 ### 8.5 关键技术依赖
 
 | # | 论文 | 来源 | 时间 |
 |---|------|------|------|
-| 25 | Robust Speech Recognition via Large-Scale Weak Supervision (Whisper) | ICML 2023 | 2023 |
+| 29 | Robust Speech Recognition via Large-Scale Weak Supervision (Whisper) | ICML 2023 | 2023 |
 
 ### 8.6 官方资源
 
@@ -810,9 +895,14 @@ LLM基座升级自动带动所有模态能力提升。
 - Qwen1.5发布博客：https://qwenlm.github.io/blog/qwen1.5/
 - Qwen3发布博客：https://qwenlm.github.io/blog/qwen3/
 - Qwen3.5发布博客：https://qwen.ai/blog?id=qwen3.5
+- Qwen3.6发布博客：https://qwen.ai/blog?id=qwen3.6
 - Qwen3.7 Agent Frontier：https://qwen.ai/blog?id=qwen3.7
 - Qwen3.7-Plus：https://qwen.ai/blog?id=qwen3.7-plus
 - Qwen3-Coder-Next：https://qwen.ai/blog?id=qwen3-coder-next
+- Qwen-Image：https://qwen.ai/blog?id=qwen-image
+- Qwen-Image-Edit：https://qwen.ai/blog?id=qwen-image-edit
+- Qwen3Guard：https://qwen.ai/blog?id=qwen3guard
+- Qwen-MT：https://qwen.ai/blog?id=qwen-mt
 - Qwen2-VL博客：https://qwenlm.github.io/blog/qwen2-vl/
 - Qwen2.5-VL博客：https://qwenlm.github.io/blog/qwen2.5-vl/
 - Qwen3-VL GitHub：https://github.com/QwenLM/Qwen3-VL

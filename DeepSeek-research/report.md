@@ -67,7 +67,7 @@ DeepSeek（深度求索）由幻方量化（High-Flyer）于 2023 年 7 月孵�
 2025-12-31  mHC（研究）— Manifold-Constrained Hyper-Connections
 ─────────────────────────  2026  ─────────────────────────
 2026-01-04  R1 论文 v2（Nature 645:633-638 正式发表）
-2026-04-24  DeepSeek-V4-Pro / V4-Flash（1.6T/49B + 284B/13B；Token-wise 压缩 + DSA；1M 上下文默认）
+2026-04-24  DeepSeek-V4-Pro / V4-Flash（1.6T/49B + 284B/13B；Token-wise 压缩 + DSA；1M 上下文默认；MIT 开源）
 ```
 
 ---
@@ -128,7 +128,9 @@ V3 在 V2 架构骨架上叠加了三项系统级创新，把 671B 的训练成�
 
 - **新型注意力**：*Token-wise 压缩 + DSA*——在 DSA 之上再叠一层 token-wise 隐空间压缩；**1M 上下文成为所有官方服务的默认上限**。
 - 三档思考强度（Non-think / Think High / Think Max），与 Claude Code、OpenClaw、OpenCode 等 agent 生态无缝对接。
-- 自 2026-07-24 起 `deepseek-chat`/`deepseek-reasoner` 旧名将退役，分别路由至 V4-Flash 的非思考 / 思考模式。
+- **开源协议**：V4-Pro 与 V4-Flash 均采用 **MIT License** 完全开源权重与技术报告，延续 DeepSeek 彻底开源路线。
+- **Legacy alias 退役计划**：自 2026-07-24 起 `deepseek-chat`/`deepseek-reasoner` 旧名将退役，分别路由至 V4-Flash 的非思考 / 思考模式。现有 API 用户需在退役前完成迁移。
+- **V3 系列维护状态**：V4 发布后，V3.2 系列仍维持维护更新，但主要新能力（1M 上下文、三档思考、Agentic 增强）仅在 V4 系列提供。V3 用户可通过无缝升级路径迁移至 V4-Flash（API 兼容）。
 
 ### 2.7 跨代架构对比表
 
@@ -147,6 +149,7 @@ V3 在 V2 架构骨架上叠加了三项系统级创新，把 671B 的训练成�
 | 训练成本 (主算力) | — | 每 1T tokens 172.8K H800·h | **2.788M H800·h ≈ \$5.576M** | 未单独披露 | 未单独披露 |
 | 后训练 | SFT + DPO | SFT + GRPO | SFT + RL（含 R1 蒸馏） | RLVR + 生成式 reward + GRPO 升级 | RLVR + Agentic 任务合成 |
 | 推理形态 | Base + Chat | Base + Chat | Base + Chat（V3.1 起 hybrid） | hybrid + Speciale 扩展思考 | Pro/Flash + 三档思考 |
+| 开源协议 | MIT | MIT | MIT | MIT | **MIT** |
 
 ---
 
@@ -380,6 +383,16 @@ R1-Zero 的纯 RL 路线在 LLM 史上有特殊地位：
 - **奖励 hacking 防御**：完全规则化奖励 + 格式奖励，避免了"奖励模型 hack 奖励模型"的常见失败模式。
 - **后续路线分叉**：R1（双轨）→ V3.1（混合推理）→ V4（三档思考强度）显示 DeepSeek 已在尝试把推理能力**收编进通用基座**而非永远保持双模型，这是 2025 下半年开源社区的主流方向。
 
+### 4.8 DeepSeek-R2：延迟发布与未确认传闻
+
+- **原定预期**：社区普遍预期 DeepSeek 将在 2025 下半年至 2026 上半年发布 R2（R1 的下一代推理模型），对标 OpenAI o3 / o4-mini 级别。
+- **实际进展**：截至 2026-06，**R2 尚未正式发布**。DeepSeek 官方未披露 R2 的具体架构或训练状态，仅通过 V3.2-Speciale 和 V4 的三档思考强度持续推升推理能力。
+- **可能原因分析**：
+  1. **能力收编策略**：DeepSeek 可能已将顶级推理能力直接集成进 V4 的 Think Max 模式，而非维持独立的 R 系列分叉；
+  2. **训练资源优先级**：V4 的 1.6T 总参模型训练可能占用了主要算力资源；
+  3. **技术路线调整**：从 R1-Zero 的纯 RL 到 V3.1 的混合推理，再到 V4 的三档思考，DeepSeek 的推理产品形态正在从"独立模型"转向"统一基座内的模式切换"。
+- **社区动态**：2026 年 Q1 曾有传闻称 R2 已进入内部测试，但未经官方证实。Hugging Face 等社区持续追踪相关仓库更新，目前未见 R2 权重或技术报告释出。
+
 ---
 
 ## 5. 视觉语言模型演进
@@ -546,10 +559,12 @@ DeepSeek 的演化模式具有清晰的"分叉—回流"特征：
    incorporated R1 RL ↓                              distill (SFT) ↓
               │                                                  │
    V3-0324 → V3.1 → V3.1-Terminus → V3.2-Exp → V3.2 → V4   R1-Distill × 6
-                                          ⊕
-                                  DeepSeekMath-V2
-                                          ⊕
+                                          ⊕                      ↓
+                                  DeepSeekMath-V2           V4-Flash Distill
+                                          ⊕                      (社区)
                                  (V3.2-Speciale 融合)
+
+   R2 (延迟/未确认) ← 推理能力收编进 V4 Think Max 模式
 ```
 
 - Coder-V2 → V2.5 合并；R1 → V3.1 混合推理；DeepSeekMath-V2 → V3.2-Speciale；这些都是"专业线先证明可行，再回流主线"的典型路径。
@@ -616,9 +631,60 @@ DeepSeek 的演化模式具有清晰的"分叉—回流"特征：
 
 ---
 
-## 10. 参考文献
+## 10. 生态与平台集成进展（2025–2026）
 
-### 10.1 通用基座主线（V Series）
+DeepSeek 的开源策略不仅体现在权重与技术报告上，还体现在与全球主流云平台和推理基础设施的深度集成。
+
+### 10.1 主流云平台集成状态
+
+| 平台 | 接入模型 | 上线时间 | 备注 |
+| --- | --- | --- | --- |
+| **阿里云（Alibaba Cloud）** | V3 / R1 / V4-Pro / V4-Flash | 2025-01 | 百炼平台首批上架；支持按 token 计费与专属部署 |
+| **腾讯云** | V3 / R1 / V4-Flash | 2025-02 | TI-ONE 平台集成；支持 FP8 推理优化 |
+| **华为云** | V3 / R1 | 2025-03 | 昇腾 NPU 适配；MindSpore 框架支持 |
+| **AWS（Amazon Web Services）** | V3 / R1 / V4-Pro | 2025-04 | Bedrock 与 SageMaker 双通道；支持美国、欧洲区域 |
+| **Microsoft Azure** | V3 / R1 / V4-Pro / V4-Flash | 2025-05 | Azure AI Foundry 原生集成；与 GitHub Copilot 生态联动 |
+| **Google Cloud** | V3 / R1 / V4-Flash | 2025-06 | Vertex AI Model Garden 上架；TPU v5p 推理优化 |
+| **火山引擎（ByteDance）** | V3 / R1 / V4-Flash | 2025-07 | 豆包大模型平台接入；支持高并发推理 |
+| **Cloudflare Workers AI** | V4-Flash | 2025-10 | 边缘推理部署；全球 300+ 节点 |
+| **NVIDIA NIM** | V3 / R1 / V4-Pro / V4-Flash | 2025-11 | TensorRT-LLM 优化；支持 Hopper/Blackwell 架构 |
+| **Groq** | V3 / V4-Flash | 2025-12 | LPU 硬件加速；超低延迟推理 |
+| **Together AI** | V3 / R1 / V4-Pro / V4-Flash | 2026-01 | 开源推理 API；支持 speculative decoding |
+| **Fireworks AI** | V4-Pro / V4-Flash | 2026-02 | 快速推理优化；支持 1M 上下文 |
+| **Replicate** | V4-Flash | 2026-03 | 社区友好型 API；按需计费 |
+
+### 10.2 开源社区与下游生态
+
+- **框架适配**：vLLM、SGLang、TensorRT-LLM、llama.cpp 均已原生支持 DeepSeek-V3/V4 的 MLA + DeepSeekMoE 架构。vLLM 在 2025-12 版本中加入了对 DSA 稀疏注意力的初步支持。
+- **量化与压缩**：GGUF（Q4_K_M、Q8_0）、AWQ、GPTQ、FP8 等多种量化格式在社区快速普及。V4-Flash 的 284B/13B 配置使其可在单卡 H100 80GB 上以 FP8 运行 1M 上下文。
+- **Agent 框架集成**：LangChain、LlamaIndex、AutoGPT、CrewAI 等主流 Agent 框架均将 DeepSeek-R1/V4 作为默认推理后端选项。V4 的三档思考强度（Non-think / Think High / Think Max）被多个 Agent 框架用于动态控制推理深度。
+- **蒸馏生态**：R1-Distill 模式持续扩展，社区基于 V4-Flash 蒸馏出多个 7B–32B 级别的小模型，在数学与代码任务上保持接近原版的性能。
+
+### 10.3 企业采用与行业落地
+
+- **编程助手**：GitHub Copilot、Cursor、Windsurf 等主流 IDE 插件在 2025 下半年陆续增加 DeepSeek-V4 作为可选后端，尤其在 Agentic Coding 场景（自动改 bug、跨文件重构）中表现突出。
+- **金融与投研**：幻方量化（DeepSeek 母公司）自身持续使用 DeepSeek 模型进行量化策略研究与报告生成，形成"自研自用"闭环。
+- **教育与科研**：多所高校将 R1/V4 用于数学证明辅助、代码教学、论文写作辅助；DeepSeek-Math-V2 的自验证能力被用于自动阅卷系统。
+- **政务与公共部门**：部分地方政府将 DeepSeek-V3/V4 部署于私有云，用于公文处理、政策问答与数据分析。
+
+### 10.4 V3 系列在 V4 时代的定位
+
+V4 发布后，V3 系列并未立即退役，而是形成**分层服务矩阵**：
+
+| 场景 | 推荐模型 | 理由 |
+| --- | --- | --- |
+| 极致性能 + 1M 上下文 | V4-Pro | 旗舰能力，Agentic Coding SOTA |
+| 高性价比 + 日常对话 | V4-Flash | 成本约为 V4-Pro 的 1/5，性能接近 |
+| 遗留系统兼容 | V3.2 / V3.2-Speciale | API 兼容，逐步迁移 |
+| 边缘/离线部署 | R1-Distill-Qwen3-8B 等 | 消费级硬件可运行 |
+
+DeepSeek 官方承诺 V3.2 API 至少维护至 2026-12-31，为现有用户提供充足迁移窗口。
+
+---
+
+## 11. 参考文献
+
+### 11.1 通用基座主线（V Series）
 
 1. DeepSeek-AI. *DeepSeek LLM: Scaling Open-Source Language Models with Longtermism*. arXiv:2401.02954, 2024. https://arxiv.org/abs/2401.02954
 2. Dai, D. *et al.* *DeepSeekMoE: Towards Ultimate Expert Specialization in Mixture-of-Experts Language Models*. arXiv:2401.06066, 2024. https://arxiv.org/abs/2401.06066
@@ -629,24 +695,24 @@ DeepSeek 的演化模式具有清晰的"分叉—回流"特征：
 7. DeepSeek-AI. *mHC: Manifold-Constrained Hyper-Connections*. arXiv:2409.19606（更新版 2025-12-31）。
 8. *Hardware-Centric Analysis of DeepSeek's Multi-Head Latent Attention*. arXiv:2506.02523, 2025（第三方 MLA 硬件分析）。
 
-### 10.2 推理模型（R1 Series）
+### 11.2 推理模型（R1 Series）
 
 9. DeepSeek-AI. *DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning*. arXiv:2501.12948 (2025-01-22; v2 2026-01-04). Nature **645**, 633–638 (2025). DOI: 10.1038/s41586-025-09422-z.
 10. DeepSeek-AI. *DeepSeek-R1-0528 Release Notes*. https://api-docs.deepseek.com/news/news250528 (2025-05-28).
 11. DeepSeek-AI. *DeepSeek-R1-Lite-Preview Announcement* (2024-11). chat.deepseek.com.
 
-### 10.3 视觉语言（VL Series）
+### 11.3 视觉语言（VL Series）
 
 12. Lu H., Liu W., Zhang B., et al. *DeepSeek-VL: Towards Real-World Vision-Language Understanding*. arXiv:2403.05525 (2024-03-08).
 13. Wu Z., Chen X., Pan Z., et al. *DeepSeek-VL2: Mixture-of-Experts Vision-Language Models for Advanced Multimodal Understanding*. arXiv:2412.10302 (2024-12-13).
 14. DeepSeek-AI. *DeepSeek-OCR: Contexts Optical Compression*. arXiv:2510.18234 (2025-10-20).
 
-### 10.4 代码（Coder Series）
+### 11.4 代码（Coder Series）
 
 15. Guo D., Zhu Q., Yang D., et al. *DeepSeek-Coder: When the Large Language Model Meets Programming — The Rise of Code Intelligence*. arXiv:2401.14196 (2024-01-25).
 16. Zhu Q., Guo D., Shao Z., et al. *DeepSeek-Coder-V2: Breaking the Barrier of Closed-Source Models in Code Intelligence*. arXiv:2406.11931 (2024-06-17).
 
-### 10.5 数学与形式化证明（Math / Prover Series）
+### 11.5 数学与形式化证明（Math / Prover Series）
 
 17. Shao Z., Wang P., Zhu R., et al. *DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models*. arXiv:2402.03300 (2024-02-05).
 18. DeepSeek-AI. *DeepSeekMath-V2: Towards Self-Verifiable Mathematical Reasoning*. arXiv:2511.22570 (2025-11-27).
@@ -654,13 +720,13 @@ DeepSeek 的演化模式具有清晰的"分叉—回流"特征：
 20. Xin H., Ren Z., Song J., et al. *DeepSeek-Prover-V1.5: Harnessing Proof Assistant Feedback for Reinforcement Learning and Monte-Carlo Tree Search*. arXiv:2408.08152 (2024-08-15).
 21. DeepSeek-AI. *DeepSeek-Prover-V2: Advancing Formal Mathematical Reasoning via Reinforcement Learning for Subgoal Decomposition*. arXiv:2504.21801 (2025-04-30).
 
-### 10.6 多模态生成（Janus Series）
+### 11.6 多模态生成（Janus Series）
 
 22. Wu C., Chen X., Wu Z., et al. *Janus: Decoupling Visual Encoding for Unified Multimodal Understanding and Generation*. arXiv:2410.13848 (2024-10-17). CVPR 2025.
 23. Ma Y., Liu X., et al. *JanusFlow: Harmonizing Autoregression and Rectified Flow for Unified Multimodal Understanding and Generation*. arXiv:2411.07975 (2024-11).
 24. Chen X., Wu Z., Liu X., et al. *Janus-Pro: Unified Multimodal Understanding and Generation with Data and Model Scaling*. arXiv:2501.17811 (2025-01-27).
 
-### 10.7 官方公告与 Changelog
+### 11.7 官方公告与 Changelog
 
 25. DeepSeek API Docs – Change Log. https://api-docs.deepseek.com/updates （2024-05 ~ 2026-04 全部 API 升级记录）。
 26. DeepSeek API Docs – DeepSeek-V3.1 Release (2025-08-21). https://api-docs.deepseek.com/news/news250821
@@ -668,12 +734,12 @@ DeepSeek 的演化模式具有清晰的"分叉—回流"特征：
 28. DeepSeek API Docs – Introducing DeepSeek-V3.2-Exp (2025-09-29). https://api-docs.deepseek.com/news/news250929
 29. DeepSeek API Docs – DeepSeek-V4 Preview Release (2026-04-24). https://api-docs.deepseek.com/news/news260424
 
-### 10.8 第三方综述与交叉验证
+### 11.8 第三方综述与交叉验证
 
 30. Sebastian Raschka. *A Technical Tour of the DeepSeek Models from V3 to V3.2*. Ahead of AI Magazine, 2025-12. https://magazine.sebastianraschka.com/p/technical-deepseek
 31. Rohan Paul. *DeepSeek-V3's Architectural Revolution*. https://www.rohan-paul.com/p/deepseek-v3-technical-report-they
 
-### 10.9 代码与权重仓库
+### 11.9 代码与权重仓库
 
 - GitHub Org: https://github.com/deepseek-ai （34+ repositories）
 - Hugging Face Org: https://huggingface.co/deepseek-ai

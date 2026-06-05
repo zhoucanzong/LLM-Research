@@ -37,7 +37,9 @@
 | 2025.01 | **Hunyuan3D 2.0** (arXiv:2501.12202) | 3D | Shape-VAE + Hunyuan3D-DiT + Hunyuan3D-Paint |
 | 2025.03 | **Hunyuan-T1** | 语言推理 | Mamba+Transformer Hybrid MoE，首个 Mamba 超大推理模型 |
 | 2025.03 | HunyuanVideo-I2V | 视频 | 图生视频扩展 |
-| 2025.05 | **Hunyuan-TurboS** (arXiv:2505.15431) | 语言 | Mamba2-Transformer Synergy + 自适应 CoT |
+| 2025.03 | **Hunyuan-TurboS** | 语言 | 快思考模型，Mamba2-Transformer Synergy + 自适应 CoT |
+| 2025.05 | **Hunyuan-T1-Vision** | 多模态推理 | 视觉深度推理模型 |
+| 2025.05 | **Hunyuan-Voice** | 语音 | 语音通话模型 |
 | 2025.05 | HunyuanVideo-Avatar (arXiv:2505.20156)，HunyuanCustom，HunyuanPortrait | 视频 | 数字人/可控/肖像视频 |
 | 2025.06 | HunyuanGameCraft (arXiv:2506.17201) | 视频 | 交互式无限长游戏视频 |
 | 2025.06–07 | **Hunyuan-A13B** | 语言 | 80B 总参 / 13B 激活 MoE，轻量代偿 |
@@ -47,7 +49,13 @@
 | 2025.10 | **Hunyuan-Vision-1.5** | VLM | Mamba-Transformer 混合 VLM，A56B/4B，"Thinking on Image" |
 | 2025.11 | **HunyuanVideo-1.5** | 视频 | 8.3B 高效视频基模，SSTA 稀疏注意力 |
 | 2025.11 | **HunyuanOCR** (arXiv:2511.19575) | VLM-OCR | 1B 商用级开源 OCR-VLM |
+| 2025.12 | **混元 2.0** | 语言 | 推理能力与效率国内领先 |
 | 2026.01 | HunyuanImage-3.0-Instruct | 图像 | 推理增强 Prompt 与 Image-to-Image |
+| 2026.03 | **混元 3.0** | 语言 | 内部测试中，预计4月发布 |
+| 2026.03 | **价格大幅上调** | 商业 | API价格上涨，HY 2.0 Instruct输入价涨幅463% |
+| 2026.04 | **HY 2.0 Think** | 语言推理 | 深度推理旗舰，128K上下文，分段定价 |
+| 2026.04 | **HY 2.0 Instruct** | 语言 | 指令遵循旗舰 |
+| 2026.06 | **旧模型退役** | 生命周期 | HY 2.0、hunyuan-turbos、hunyuan-t1等9个旧版本不再支持 |
 
 > 提示：阶段时间以 arXiv 提交或官方仓库 README 公示日期为准；部分模型存在多版本迭代（如 Hunyuan3D 2.0 → 2.1/2.5）。
 
@@ -60,7 +68,10 @@ Hunyuan 总平台
 │   ├── Hunyuan-Large (389B/52B MoE)
 │   ├── Hunyuan-A13B (80B/13B MoE)
 │   ├── Hunyuan-TurboS (Mamba+Transformer Hybrid MoE)
-│   └── Hunyuan-T1 (Hybrid MoE 推理强化)
+│   ├── Hunyuan-T1 (Hybrid MoE 推理强化)
+│   ├── 混元 2.0 (2025.12，推理能力与效率国内领先)
+│   ├── HY 2.0 Think (2026.04，深度推理旗舰)
+│   └── HY 2.0 Instruct (2026.04，指令遵循旗舰)
 ├── 图像生成
 │   ├── Hunyuan-DiT (中文原生 DiT)
 │   ├── HunyuanImage-2.1 (17B DiT, 2K)
@@ -76,10 +87,12 @@ Hunyuan 总平台
 ├── 多模态理解
 │   ├── Hunyuan-VL (闭源)
 │   ├── Hunyuan-Vision-1.5 (Mamba-T 混合 VLM)
-│   └── HunyuanOCR (1B)
-└── 音频/翻译
+│   ├── HunyuanOCR (1B)
+│   └── Hunyuan-T1-Vision (2025.05，视觉深度推理)
+└── 音频/翻译/语音
     ├── HunyuanVideo-Foley (V2A)
-    └── Hunyuan-MT-7B (翻译)
+    ├── Hunyuan-MT-7B (翻译)
+    └── Hunyuan-Voice (2025.05，语音通话模型)
 ```
 
 ---
@@ -127,12 +140,66 @@ Hunyuan 总平台
 ### 2.5 Hunyuan-T1：首个 Mamba 驱动的超大推理模型
 
 > 官方页：tencent.github.io/llm.hunyuan.T1。
+> 发布时间：2025-03-21
 
 - **架构**：超大规模 **Hybrid-Transformer-Mamba MoE**（在 TurboS 基础上加深推理优化层），公开为腾讯首个具备"深度推理"能力的旗舰模型。
 - **能力**：长文本理解（继承 TurboS 的长上下文捕获能力）+ 强化学习驱动的链式推理；与 DeepSeek-R1、OpenAI o1 同梯队对标。
 - **关系**：T1 在 TurboS 之上提供"思考型"推理；TurboS 反向用 T1 的推理输出做自适应 CoT 蒸馏。
 
-### 2.6 语言模型对比表
+### 2.6 混元 2.0（2025-12-08）
+
+- **定位**：推理能力与效率国内领先的基座模型
+- **能力**：在中文推理、数学、代码等维度达到国内第一梯队
+- **后续**：为2026年HY 2.0系列奠定基础
+
+### 2.7 HY 2.0 Think / Instruct（2026-04-27）
+
+**HY 2.0 Think**：
+- **定位**：深度推理旗舰
+- **上下文窗口**：128K
+- **定价策略**：分段定价（输入/输出按token区间差异化计价）
+- **能力**：继承并超越T1的深度推理能力，在数学、代码、逻辑推理等基准上达到新高度
+
+**HY 2.0 Instruct**：
+- **定位**：指令遵循旗舰
+- **能力**：在复杂指令遵循、长文本理解、多轮对话等场景优化
+- **价格**：API价格经历大幅上调（见第2.9节）
+
+### 2.8 Hunyuan-T1-Vision / Voice（2025-05）
+
+**Hunyuan-T1-Vision**：
+- **定位**：视觉深度推理模型
+- **能力**：继承T1的推理能力，扩展至视觉理解领域，支持图像分析、图表推理、文档理解等
+
+**Hunyuan-Voice**：
+- **定位**：语音通话模型
+- **能力**：端到端语音交互，支持实时语音对话、语音指令遵循等场景
+
+### 2.9 商业动态：价格上调与旧模型退役
+
+**价格大幅上调（2026-03-04）**：
+- 腾讯混元API价格经历大幅调整
+- HY 2.0 Instruct输入价格涨幅达**463%**
+- 反映模型能力升级后的商业价值重估
+
+**旧模型退役（2026-06-26）**：
+- 以下9个旧版本模型将不再支持：
+  - 混元 2.0（旧版）
+  - hunyuan-turbos
+  - hunyuan-t1
+  - hunyuan-large-role
+  - hunyuan-translation
+  - hunyuan-vision-1.5
+  - hunyuan-lite
+  - 及其他早期版本
+- **迁移路径**：用户需迁移至HY 2.0 Think/Instruct等新模型
+
+**混元 3.0 内部测试（2026-03-19）**：
+- 下一代旗舰模型已进入内部测试阶段
+- 预计2026年4月正式发布
+- 预计将在推理能力、多模态统一、Agent能力等维度实现代际跃升
+
+### 2.10 语言模型对比表
 
 | 模型 | 总参/激活 | 架构 | 上下文 | 训练 token | 主要场景 | 开源 |
 |---|---|---|---|---|---|---|
@@ -141,6 +208,9 @@ Hunyuan 总平台
 | Hunyuan-A13B | 80B / 13B | Fine-grained MoE | 256K | – | 高性价比通用 | ✅ |
 | Hunyuan-TurboS | – | Mamba2 + Transformer Hybrid MoE | 长上下文 | – | 通用 + 自适应 CoT | API |
 | Hunyuan-T1 | – | Hybrid Mamba-Transformer MoE | 长上下文 | – | 深度推理 | API |
+| 混元 2.0 (2025.12) | – | – | – | – | 推理与效率旗舰 | API |
+| HY 2.0 Think (2026.04) | – | – | 128K | – | 深度推理旗舰 | API |
+| HY 2.0 Instruct (2026.04) | – | – | 128K | – | 指令遵循旗舰 | API |
 
 ---
 
@@ -359,7 +429,8 @@ Hunyuan 总平台
 |---|---|---|---|
 | Phase 1：闭源旗舰 | 2023–2024.04 | Hunyuan-LLM trillion MoE | 业务 LLM |
 | Phase 2：开源全栈爆发 | 2024.05–2025.06 | DiT/Large/3D/Video 同期开源 | "造各赛道开源 SOTA" |
-| Phase 3：架构融合 + 生态平台化 | 2025.05–2026 | TurboS/T1/Vision-1.5/Image-3.0/Video-1.5/HunyuanWorld | "Mamba-Transformer 混合 + 多模态统一 AR + 世界化" |
+| Phase 3：架构融合 + 生态平台化 | 2025.05–2026.04 | TurboS/T1/Vision-1.5/Image-3.0/Video-1.5/HunyuanWorld | "Mamba-Transformer 混合 + 多模态统一 AR + 世界化" |
+| Phase 4：新旗舰换代 + 商业重构 | 2025.12–2026.06 | 混元 2.0 → HY 2.0 Think/Instruct + 价格上调 + 旧模型退役 + 混元 3.0 预告 | "旗舰升级、商业模型转型、代际更替" |
 
 ### 8.3 与 LLM、生成线的相互增强
 
@@ -451,4 +522,4 @@ Hunyuan 总平台
 25. *Hunyuan AI 视频项目官网.* https://aivideo.hunyuan.tencent.com/
 26. *Tencent Hy Research.* https://hy.tencent.com/
 
-> 报告完成时间：2026-06-04（基于截至该时间公开的论文与官方信息）。
+> 报告完成时间：2026-06-05（基于截至该时间公开的论文与官方信息）。

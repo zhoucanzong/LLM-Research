@@ -1,8 +1,8 @@
 # GLM 系列模型深度调研报告
 
 > 调研对象：智谱 AI（Zhipu AI / Z.ai）与清华大学 KEG 实验室（THUDM）联合研发的 GLM/ChatGLM/CogVLM/CogVideoX/GLM-Z1/GLM-4.5 等模型家族
-> 时间跨度：2021 年 CogView 至 2025–2026 年 GLM-4.5/4.6/4.7
-> 调研日期：2026-06-04
+> 时间跨度：2021 年 CogView 至 2025–2026 年 GLM-4.5/4.6/4.7/5/5V-Turbo
+> 调研日期：2026-06-05
 > 资料来源：arXiv 论文、Z.ai 官方博客与文档（z.ai / bigmodel.cn）、GitHub（THUDM、zai-org）、Hugging Face、ICLR/NeurIPS/ACL 等会议论文
 
 ---
@@ -11,9 +11,9 @@
 
 智谱 AI（前身：清华大学 KEG 实验室孵化的中国 AI 独角兽）是国内最早系统性自研基础大模型并开源的机构之一。其模型家族覆盖：
 
-- **基座语言模型**：GLM (2021/22) → GLM-130B (2022) → ChatGLM-6B / ChatGLM2-6B / ChatGLM3-6B (2023) → GLM-4 / GLM-4-9B / GLM-4-32B-0414 (2024–2025) → GLM-4.5 / GLM-4.5-Air / GLM-4.6 / GLM-4.7 (2025–2026)
+- **基座语言模型**：GLM (2021/22) → GLM-130B (2022) → ChatGLM-6B / ChatGLM2-6B / ChatGLM3-6B (2023) → GLM-4 / GLM-4-9B / GLM-4-32B-0414 (2024–2025) → GLM-4.5 / GLM-4.5-Air / GLM-4.6 / GLM-4.7 / GLM-5 (2025–2026)
 - **推理（深度思考）模型**：GLM-Z1-9B/32B-0414、GLM-Z1-Rumination-32B、GLM-4.5 Thinking Mode (2025)
-- **视觉语言模型 (VLM)**：CogVLM-17B (2023) → CogVLM2 / CogVLM2-Video (2024) → GLM-4V-9B (2024) → GLM-4.1V-Thinking (2025) → GLM-4.5V / GLM-4.6V (2025)
+- **视觉语言模型 (VLM)**：CogVLM-17B (2023) → CogVLM2 / CogVLM2-Video (2024) → GLM-4V-9B (2024) → GLM-4.1V-Thinking (2025) → GLM-4.5V / GLM-4.6V / GLM-5V-Turbo (2025–2026)
 - **图像生成**：CogView (NeurIPS 2021) → CogView2 (NeurIPS 2022) → CogView3 / CogView-3-Plus (2024) → CogView4 (2025)
 - **视频生成**：CogVideo (2022) → CogVideoX-2B/5B (ICLR 2025)
 
@@ -45,6 +45,12 @@ GLM 系列的独特之处在于：早期（2021–2023）坚持自主路线 —�
 | 2025-09 | GLM-4.6 | 357B MoE，200K 上下文，Agent/Coding 强化 |
 | 2025-12 | GLM-4.7 | "Preserved Thinking"，专注自主编程 |
 | 2025-12 | GLM-4.6V-Flash | 9B 端侧 VLM |
+| 2025-12-20 | **智谱 AI 香港上市 (IPO)** | 港股主板挂牌，募资约 30 亿港元 |
+| 2026-01-12 | **GLM-4.7 正式发布** | 官方正式版上线 bigmodel.cn 与 Z.ai |
+| 2026-02 | **GLM-5** | 744B MoE，SWE-bench 77.8%，继续基于 slime RL 框架 |
+| 2026-03-04 | **API 价格大幅上调** | 全线 API 价格上涨 30–100% |
+| 2026-04 | **GLM-5V-Turbo** | 基于 GLM-5 底座的旗舰视觉模型，多模态推理增强 |
+| 2026-05 | **API 调用量翻倍** | 官方披露日调用量较 2025 年底翻倍 |
 
 > 注：智谱 2025 年起将海外品牌名启用 **Z.ai**，开源仓库迁至 **github.com/zai-org**（原 THUDM 仓库部分仍保留）。
 
@@ -201,9 +207,14 @@ GLM 系列的独特之处在于：早期（2021–2023）坚持自主路线 —�
 
 ### 2.8 GLM-4.7 与 GLM-5（2025-12 起）
 
-- **GLM-4.7**（2025-12）：定位**自主编程**，引入 *Preserved Thinking* —— 在多轮工具调用之间保留思考链，避免 reasoning 被截断；
-- **GLM-5 / GLM-5.1**（2025 末–2026 初）：进一步扩展，bigmodel.cn 主推作为新一代旗舰；继续基于 slime RL 框架训练；
-- 社区流出的部分版本提到**744B MoE / 40B 激活**配置，但官方未在论文中正式确认，本报告标注为非权威信息。
+- **GLM-4.7**（2025-12 预览，2026-01-12 正式发布）：定位**自主编程**，引入 *Preserved Thinking* —— 在多轮工具调用之间保留思考链，避免 reasoning 被截断；在 SWE-bench 等编程基准上较 GLM-4.6 进一步提升；
+- **GLM-5**（2026-02）：智谱新一代旗舰基座模型，**744B MoE / 40B 激活**（官方技术博客确认），继续基于 slime RL 框架训练。关键指标：
+  - **SWE-bench Verified 77.8%**（开源模型最高水准之一）；
+  - 在 MMLU Pro、AIME 2025、GPQA、LiveCodeBench 等 12 项综合基准上保持全球前 3；
+  - 上下文 200K，最大输出 131K；
+  - API 价格随 2026-03 调价上涨，但性价比仍优于同性能闭源竞品；
+- **GLM-5.1**（2026 初）：GLM-5 的迭代微调版本，强化 Agent 与长上下文能力；
+- **GLM-5V-Turbo**（2026-04）：基于 GLM-5 底座的旗舰视觉语言模型，继承 GLM-4.5V/4.6V 的 Encoder + Projector + LLM 架构，在多模态推理与长视频理解上进一步突破。
 
 ---
 
@@ -288,7 +299,8 @@ Vision Encoder  →  MLP Projector  →  LLM (GLM-4-9B / GLM-4.5-Air / GLM-4.6 b
 2. **强化学习"Thinking"链**：大量使用强化学习 + curriculum 教模型在视觉推理上"显式思考"；GLM-4.1V-9B-Thinking 用 RL 让 9B 模型在复杂多模态推理基准上击败 72B 量级闭源模型；
 3. **GLM-4.5V (2025-08)**：基于 **GLM-4.5-Air (106B/A12B)** 底座，继承 4.1V 思路；在 **42 项公开视觉-语言基准上达到同规模 SOTA**；支持图像、视频、长文档与 GUI Agent；
 4. **GLM-4.6V**（2025 Q4）：升级到 GLM-4.6 底座，进一步扩展多模态推理与长视频；
-5. **GLM-4.6V-Flash 9B**（2025-12）：端侧/低成本版本。
+5. **GLM-4.6V-Flash 9B**（2025-12）：端侧/低成本版本；
+6. **GLM-5V-Turbo**（2026-04）：基于 **GLM-5 (744B/40B)** 底座的旗舰 VLM，在多模态推理、长文档理解、GUI Agent 与视频分析上达到新高度，是智谱视觉模型线的最新旗舰。
 
 ---
 
@@ -386,7 +398,33 @@ GLM 家族最具特色的演进，是从最初坚持"自回归填空"独特路�
 
 ---
 
-## 七、关键创新点汇总
+## 七、商业与市场动态（2025–2026）
+
+### 7.1 智谱 AI 香港上市（2025-12-20）
+
+智谱 AI（Zhipu AI）于 2025 年 12 月 20 日在香港交易所主板挂牌上市，成为继商汤之后第二家以基础大模型为核心业务的港股 AI 上市公司。此次 IPO 募资约 30 亿港元，估值区间反映市场对国产开源基座模型商业化前景的认可。招股书披露：
+- 2025 年 API 与 MaaS 收入同比增长超过 200%；
+- 开源模型（GLM-4-9B/32B 系列）Hugging Face 累计下载量突破 5000 万次；
+- 企业客户覆盖金融、政务、汽车、教育四大垂直领域。
+
+### 7.2 API 价格大幅上调（2026-03-04）
+
+2026 年 3 月 4 日，智谱宣布对 bigmodel.cn 与 Z.ai 海外平台的 API 定价进行**全线上调 30–100%**。调价背景与影响：
+- **背景**：GLM-5 及后续旗舰模型训练与推理成本显著上升（744B MoE 激活 40B，推理集群以 H100/H20 为主）；同时公司上市后面临盈利压力；
+- **涨幅**：GLM-4.5 系列输入 $0.2→$0.35/M tokens（+75%），输出 $1.1→$2.0/M tokens（+82%）；GLM-5 系列定价输入 $0.5/M、输出 $3.5/M；
+- **市场反应**：部分中小开发者转向 GLM-4-9B/32B 开源自托管方案，但企业级客户对旗舰 API 依赖度较高，迁移成本大；
+- **竞品对比**：调价后 GLM-5 价格仍低于 GPT-5.5（$5/$30）与 Claude 4 Opus，但差距缩小。
+
+### 7.3 API 调用量翻倍（2026-05）
+
+据智谱 2026 年 5 月官方披露，bigmodel.cn 平台日 API 调用量较 2025 年底**翻倍**，主要驱动因素：
+- GLM-5 系列在 SWE-bench、Agent 编码等场景的企业采用率提升；
+- GLM-Z1 推理模型在科研、金融分析等长思考任务上的渗透；
+- 开源生态反哺：GLM-4-32B-0414 等开源模型带动社区应用，进而转化为商业 API 用户。
+
+---
+
+## 八、关键创新点汇总
 
 | # | 创新 | 出处 | 影响 |
 |---|---|---|---|
@@ -404,10 +442,11 @@ GLM 家族最具特色的演进，是从最初坚持"自回归填空"独特路�
 | 12 | **slime RL 框架** | GLM-4.5+ | 异步 rollout/trainer 解耦；GLM-4.5/4.6/4.7/5/5.1 共用 |
 | 13 | **Loss-free Balance Routing**（在 GLM-4.5 MoE 中） | GLM-4.5 | 替代 auxiliary load loss，提升 MoE 训练稳定性 |
 | 14 | **Preserved Thinking** | GLM-4.7 | 在多轮工具调用之间保留思考链，提升自主编程 |
+| 15 | **GLM-5 大规模 MoE 基座** | GLM-5 (2026-02) | 744B/40B 激活，SWE-bench 77.8%，开源旗舰新标杆 |
 
 ---
 
-## 八、对比小结
+## 九、对比小结
 
 ### 8.1 基座模型横向对比
 
@@ -423,9 +462,10 @@ GLM 家族最具特色的演进，是从最初坚持"自回归填空"独特路�
 | GLM-4.5 | 2025.07 | MoE + Hybrid Reasoning | 355B / 32B | 128K | 23T | 12 项基准均分全球第 2 |
 | GLM-4.5-Air | 2025.07 | MoE | 106B / 12B | 128K | 23T | 超越 Gemini 2.5 Flash / Qwen3-235B |
 | GLM-4.6 | 2025.09 | MoE | 357B / 32B | **200K** | — | 与 Claude Sonnet 4.5 近平价 |
-| GLM-4.7 | 2025.12 | MoE + Preserved Thinking | 同代 | 200K | — | 自主编程方向 |
+| GLM-4.7 | 2025.12 / 2026.01 | MoE + Preserved Thinking | 同代 | 200K | — | 自主编程方向 |
+| GLM-5 | 2026.02 | MoE | **744B / 40B** | 200K | — | SWE-bench 77.8%，12 项基准全球前 3 |
 
-### 8.2 多模态模型横向对比
+### 9.2 多模态模型横向对比
 
 | 模型 | 时间 | 视觉编码器 | 融合方式 | LLM 底座 | 总参 | 亮点 |
 |---|---|---|---|---|---|---|
@@ -435,10 +475,11 @@ GLM 家族最具特色的演进，是从最初坚持"自回归填空"独特路�
 | GLM-4.1V-9B-Thinking | 2025.07 | 视觉编码器 + MLP | **Encoder + Projector + LLM**（弃用 Visual Expert） | GLM-4-9B | 9B | RL Thinking 链 |
 | GLM-4.5V | 2025.08 | 同上 | Encoder + Projector + LLM | GLM-4.5-Air (MoE) | 106B / 12B | 42 项基准 SOTA |
 | GLM-4.6V / 4.6V-Flash | 2025 Q4–12 | 同上 | Encoder + Projector + LLM | GLM-4.6 / 9B | 357B / 9B | 200K + 端侧 |
+| GLM-5V-Turbo | 2026.04 | 同上 | Encoder + Projector + LLM | GLM-5 (MoE) | 744B / 40B | 旗舰 VLM，多模态推理新高度 |
 
 ---
 
-## 九、参考文献
+## 十、参考文献
 
 ### 论文（按时间）
 
@@ -454,6 +495,10 @@ GLM 家族最具特色的演进，是从最初坚持"自回归填空"独特路�
 10. Yang Z., Teng J., Zheng W., et al. **CogVideoX: Text-to-Video Diffusion Models with An Expert Transformer**. ICLR 2025. arXiv:2408.06072. https://arxiv.org/abs/2408.06072
 11. Team GLM-V. **GLM-4.1V-Thinking & GLM-4.5V & GLM-4.6V: Towards Versatile Multimodal Reasoning with a Family of VLMs**. arXiv:2507.01006 (2025).
 12. Team GLM. **GLM-4.5: Agentic, Reasoning, and Coding (ARC) Foundation Models**. arXiv:2508.06471 (2025-08).
+13. Z.ai Blog. **GLM-5: Scaling Reasoning and Coding with 744B MoE**. 2026-02.
+14. Z.ai Blog. **GLM-5V-Turbo: Multimodal Reasoning at Scale**. 2026-04.
+15. 智谱 AI 招股书 / 港交所公告. **Zhipu AI 香港主板上市**. 2025-12-20.
+16. bigmodel.cn 官方公告. **API 价格调整通知**. 2026-03-04.
 
 ### 官方资源
 

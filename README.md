@@ -6,10 +6,10 @@
 
 > ⚠️ **重要声明**：本知识库所有报告均由 AI Agent 自动调研生成，信息来源于公开网络搜索、第三方评测站点、社交媒体及行业媒体报道。由于大模型厂商官方披露程度不一，部分日期、参数、benchmark 数据可能存在错误、过时或未经证实的情况。**所有内容仅供参考，不构成权威结论，建议读者直接查阅各厂商官方渠道获取最新准确信息。**
 
-覆盖 **15 个主流模型 / 系列** · 持续更新中
+覆盖 **16 个主流模型 / 系列 + 1 个技术专题** · 持续更新中
 
-[![Reports](https://img.shields.io/badge/Reports-15-blue?style=flat-square)](.)
-[![Files](https://img.shields.io/badge/Files-20-green?style=flat-square)](.)
+[![Reports](https://img.shields.io/badge/Reports-16-blue?style=flat-square)](.)
+[![Files](https://img.shields.io/badge/Files-23-green?style=flat-square)](.)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](./LICENSE)
 
 </div>
@@ -35,8 +35,9 @@
 | 13 | 🇫🇷 | [**Mistral**](./Mistral-research/)         | Mistral AI|   1   | 欧洲开源领袖、GDPR主权、多语言Tier-1     |
 | 14 | 🇺🇸 | [**Nemotron**](./Nemotron-research/)       | NVIDIA    |   1   | 混合Mamba架构、合成数据、Agentic高效推理 |
 | 15 | 🇨🇳 | [**Qwen**](./Qwen-research/)               | 阿里      |   4   | 文本 + VL + Omni + 生态，覆盖面最广      |
+| 16 | 🔬 | [**SpeculativeDecoding**](./SpeculativeDecoding-research/) | 学术界/工业界 | 1 | 投机解码技术演进：EAGLE/DFlash/多模态 |
 
-> **🇨🇳 国内 8 家** &nbsp;|&nbsp; **🇺🇸 海外 5 家** &nbsp;|&nbsp; **🇫🇷 欧洲 1 家** &nbsp;|&nbsp; 共 **22 份** Markdown 报告
+> **🇨🇳 国内 8 家** &nbsp;|&nbsp; **🇺🇸 海外 5 家** &nbsp;|&nbsp; **🇫🇷 欧洲 1 家** &nbsp;|&nbsp; **🔬 技术专题 1 个** &nbsp;|&nbsp; 共 **23 份** Markdown 报告
 
 ---
 
@@ -67,6 +68,14 @@ LLM-research/
 │   ├── qwen-text-models.md         #   文本模型专题
 │   ├── qwen-vl-models.md           #   视觉语言模型专题
 │   └── qwen-omni-and-ecosystem.md  #   Omni 模型与生态
+└── SpeculativeDecoding-research/     # 投机解码技术专题
+    ├── report.md                       #   主报告：概述、时间线、瓶颈、框架、QwenAccel-Train
+    ├── speculative-classical-and-self.md   #   经典方法与自投机（Medusa/Hydra/Lookahead）
+    ├── speculative-eagle-series.md         #   EAGLE系列（EAGLE-1/2/3/SpecForge）
+    ├── speculative-block-diffusion.md        #   块扩散与检索式方法（DFlash/REST/PLD）
+    ├── speculative-training-optimization.md #   训练目标优化（LK Losses/PPOW/ConFu）
+    ├── speculative-multimodal.md           #   多模态投机解码（VLM/视频/VLA/语音）
+    └── speculative-systems-and-frameworks.md #   系统级优化与框架生态（vLLM/SGLang/TensorRT-LLM）
 ```
 
 ---

@@ -35,23 +35,25 @@
 | 13 | 🇫🇷 | [**Mistral**](./ModelSeries/Mistral-research/)         | Mistral AI|   1   | 欧洲开源领袖、GDPR主权、多语言Tier-1     |
 | 14 | 🇺🇸 | [**Nemotron**](./ModelSeries/Nemotron-research/)       | NVIDIA    |   1   | 混合Mamba架构、合成数据、Agentic高效推理 |
 | 15 | 🇨🇳 | [**Qwen**](./ModelSeries/Qwen-research/)               | 阿里      |   4   | 文本 + VL + Omni + 生态，覆盖面最广      |
-| 16 | 🔬 | [**SpeculativeDecoding**](./TechnicalTopics/SpeculativeDecoding-research/) | 学术界/工业界 | 1 | 投机解码技术演进：EAGLE/DFlash/多模态 |
+
+> **🇨🇳 国内 8 家** &nbsp;|&nbsp; **🇺🇸 海外 5 家** &nbsp;|&nbsp; **🇫🇷 欧洲 1 家** &nbsp;|&nbsp; 共 **16 个** 模型系列
 
 ### 技术专题
 
 | #  | 图标 | 专题                                          | 覆盖范围  | 报告数 | 亮点                                     |
 | -- | :--: | --------------------------------------------- | --------- | :----: | ---------------------------------------- |
-| 17 | 🔬 | [**LongContext**](./TechnicalTopics/LongContext-research/) | 长上下文技术 |   1   | FlashAttention、Ring Attention、线性注意力、百万Token窗口 |
-| 18 | 🔬 | [**MoE**](./TechnicalTopics/MoE-research/)                 | 混合专家架构 |   1   | Switch→DeepSeekMoE→Routing-Free，负载均衡与推理优化 |
-| 19 | 🔬 | [**ReasoningModels**](./TechnicalTopics/ReasoningModels-research/) | 推理模型 |   1   | o1/R1/k1.5，Test-Time Scaling，GRPO/DAPO训练方法 |
-| 20 | 🔬 | [**VLM**](./TechnicalTopics/VLM-research/)                 | 多模态大模型 |   1   | GPT-4o/Qwen3-VL，视觉编码器、模态对齐、长视频理解 |
-| 21 | 🔬 | [**Agent**](./TechnicalTopics/Agent-research/)             | Agent架构   |   1   | ReAct/MCP/A2A，多Agent系统，工具使用与记忆 |
-| 22 | 🔬 | [**Alignment**](./TechnicalTopics/Alignment-research/)     | 模型对齐    |   1   | RLHF/DPO/GRPO/DAPO，安全对齐与奖励黑客缓解 |
-| 23 | 🔬 | [**TrainingInfra**](./TechnicalTopics/TrainingInfra-research/) | 训练基础设施 |   1   | DeepSpeed/FSDP/Megatron，3D并行，万卡集群 |
-| 24 | 🔬 | [**QuantizationEdge**](./TechnicalTopics/QuantizationEdge-research/) | 量化与边缘部署 |   1   | AWQ/GPTQ/GGUF/FP8，vLLM/Ollama，Jetson边缘 |
-| 25 | 🔬 | [**RAG**](./TechnicalTopics/RAG-research/)                 | 检索增强生成 |   1   | RAG 0.0→4.0，GraphRAG，Agentic RAG，混合检索 |
+| 1  | 🔬 | [**SpeculativeDecoding**](./TechnicalTopics/SpeculativeDecoding-research/) | 投机解码 |   7   | EAGLE/DFlash/多模态投机，经典方法到系统框架 |
+| 2  | 🔬 | [**LongContext**](./TechnicalTopics/LongContext-research/) | 长上下文技术 |   1   | FlashAttention、Ring Attention、线性注意力、百万Token窗口 |
+| 3  | 🔬 | [**MoE**](./TechnicalTopics/MoE-research/)                 | 混合专家架构 |   1   | Switch→DeepSeekMoE→Routing-Free，负载均衡与推理优化 |
+| 4  | 🔬 | [**ReasoningModels**](./TechnicalTopics/ReasoningModels-research/) | 推理模型 |   1   | o1/R1/k1.5，Test-Time Scaling，GRPO/DAPO训练方法 |
+| 5  | 🔬 | [**VLM**](./TechnicalTopics/VLM-research/)                 | 多模态大模型 |   1   | GPT-4o/Qwen3-VL，视觉编码器、模态对齐、长视频理解 |
+| 6  | 🔬 | [**Agent**](./TechnicalTopics/Agent-research/)             | Agent架构   |   1   | ReAct/MCP/A2A，多Agent系统，工具使用与记忆 |
+| 7  | 🔬 | [**Alignment**](./TechnicalTopics/Alignment-research/)     | 模型对齐    |   1   | RLHF/DPO/GRPO/DAPO，安全对齐与奖励黑客缓解 |
+| 8  | 🔬 | [**TrainingInfra**](./TechnicalTopics/TrainingInfra-research/) | 训练基础设施 |   1   | DeepSpeed/FSDP/Megatron，3D并行，万卡集群 |
+| 9  | 🔬 | [**QuantizationEdge**](./TechnicalTopics/QuantizationEdge-research/) | 量化与边缘部署 |   1   | AWQ/GPTQ/GGUF/FP8，vLLM/Ollama，Jetson边缘 |
+| 10 | 🔬 | [**RAG**](./TechnicalTopics/RAG-research/)                 | 检索增强生成 |   1   | RAG 0.0→4.0，GraphRAG，Agentic RAG，混合检索 |
 
-> **🇨🇳 国内 8 家** &nbsp;|&nbsp; **🇺🇸 海外 5 家** &nbsp;|&nbsp; **🇫🇷 欧洲 1 家** &nbsp;|&nbsp; **🔬 技术专题 10 个** &nbsp;|&nbsp; 共 **32 份** Markdown 报告
+> **🔬 技术专题 10 个** &nbsp;|&nbsp; 共 **32 份** Markdown 报告
 
 ---
 
